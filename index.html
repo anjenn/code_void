@@ -2320,7 +2320,8 @@
     let authClient = null;
     let recordStore = null;
     let currentUser = null;
-    let currentUserIsAdmin = false;
+    let currentAdminUid = "";
+    let authStateCheckId = 0;
     let unsubscribeOrderRecords = null;
     let unsubscribeCalendarSettings = null;
     let unsubscribeSlotOverrides = [];
@@ -2366,10 +2367,13 @@
           subscribeCalendarSettings();
           subscribeSlotOverrides();
           onAuthStateChanged(authClient, async user => {
+            const checkId = ++authStateCheckId;
             currentUser = user;
-            currentUserIsAdmin = false;
+            currentAdminUid = "";
             updateAuthUi();
-            if (user) currentUserIsAdmin = await hasAdminAccess(user);
+            const hasAccess = user ? await hasAdminAccess(user) : false;
+            if (checkId !== authStateCheckId || user?.uid !== currentUser?.uid) return;
+            currentAdminUid = hasAccess ? user.uid : "";
             updateAuthUi();
             if (user === currentUser && isAdminUser(user)) {
               subscribeOrderRecords();
@@ -2396,7 +2400,7 @@
     }
 
     function isAdminUser(user = currentUser) {
-      return Boolean(user && user.emailVerified && currentUserIsAdmin && user.uid === currentUser?.uid);
+      return Boolean(user && user.emailVerified && user.uid && user.uid === currentUser?.uid && user.uid === currentAdminUid);
     }
 
     function updateAuthUi() {
@@ -2423,7 +2427,9 @@
       provider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(authClient, provider);
       currentUser = result.user;
-      currentUserIsAdmin = await hasAdminAccess(result.user);
+      currentAdminUid = "";
+      const hasAccess = await hasAdminAccess(result.user);
+      if (result.user?.uid === currentUser?.uid) currentAdminUid = hasAccess ? result.user.uid : "";
       updateAuthUi();
       return result.user;
     }
@@ -3792,9 +3798,11 @@
 
     function setAdminMode(enabled) {
       const adminSwitch = document.getElementById("adminSwitch");
-      adminSwitch.checked = enabled;
-      document.body.classList.toggle("admin-on", enabled);
+      const canEnable = Boolean(enabled && isAdminUser());
+      adminSwitch.checked = canEnable;
+      document.body.classList.toggle("admin-on", canEnable);
       renderAll();
+      return canEnable;
     }
 
     function showAdminTab(tab) {
@@ -3819,8 +3827,13 @@
     }
 
     function unlockAdmin() {
+      if (!isAdminUser()) {
+        setAdminMode(false);
+        showToast(t("adminPasswordWrong"));
+        return;
+      }
       document.getElementById("adminLock").classList.remove("is-open");
-      setAdminMode(true);
+      if (!setAdminMode(true)) return;
       showToast(t("adminUnlocked"));
       document.getElementById("adminHub").scrollIntoView({ behavior: "smooth", block: "start" });
     }
