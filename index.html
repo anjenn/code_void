@@ -732,14 +732,6 @@
       gap: 5px;
     }
 
-    .mobile-week-label {
-      display: none;
-      color: #8f4e9b;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 900;
-    }
-
     .mobile-mini-day {
       min-height: 42px;
       display: grid;
@@ -1662,7 +1654,6 @@
       .section-title h2, .admin-title h2 { font-size: 30px; }
       .concept-grid, .dashboard-grid, .notice-grid, .field-row { grid-template-columns: 1fr; }
       .mobile-calendar-tools { display: grid; gap: 8px; margin: 0 0 10px; }
-      .mobile-week-label { display: block; }
       .month-calendar:not(.is-mobile-expanded) .calendar-week-block.is-mobile-extra { display: none; }
       .mobile-calendar-more { display: block; margin-top: 10px; }
       .month-calendar.is-mobile-expanded .mobile-calendar-more { display: none; }
@@ -1676,6 +1667,7 @@
         max-height: none;
       }
       .calendar-day-column.is-weekday-range { height: auto; max-height: none; }
+      .calendar-week-row .calendar-day-column.is-weekday-range.is-mobile-active { min-height: 0; }
       .calendar-day-head { min-height: 50px; padding: 9px 8px; }
       .calendar-slot-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2100,7 +2092,7 @@
         viewGuide: "안내 보기",
         selectConcept: "컨셉 선택",
         calendarTitle: "예약 캘린더",
-        weekdayRequest: "요청하기",
+        weekdayRequest: "문의하기",
         selectedSlotTitle: "선택한 슬롯",
         selectedSlotHelper: "가능한 모든 시간대를 선택해 주세요.",
         noSlotSelected: "가능한 슬롯을 여러 개 선택해 주세요. 주말은 송파구 스튜디오 상주 시간이며, 월-금은 요청하기로 선호 시간대와 위치를 남길 수 있습니다.",
@@ -3544,16 +3536,6 @@
       return dates.length ? `${dates[0]}_${dates[dates.length - 1]}` : "";
     }
 
-    function mobileWeekLabel(weekDates) {
-      const firstDay = weekDates.find(day => day.inWindow) || weekDates[0];
-      const date = new Date(`${firstDay.iso}T00:00:00`);
-      const month = new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", { month: "long" }).format(date);
-      const weekNumber = Math.floor((date.getDate() - 1) / 7) + 1;
-      if (lang === "ko") return `${month} ${weekNumber}주차`;
-      const suffix = weekNumber === 1 ? "st" : weekNumber === 2 ? "nd" : weekNumber === 3 ? "rd" : "th";
-      return `${weekNumber}${suffix} week of ${month}`;
-    }
-
     function calendarCellKey(cell) {
       if (cell.type === "weekdayRange") return `weekday_${cell.slots.map(slot => slot.date).join("_")}`;
       if (cell.type === "unavailableRange") return `unavailable_${cell.days.map(day => day.iso).join("_")}`;
@@ -3606,11 +3588,10 @@
       return false;
     }
 
-    function renderMobileCalendarTools(weekId, cells, selectedKey, weekLabel) {
+    function renderMobileCalendarTools(weekId, cells, selectedKey) {
       if (!weekId) return "";
       return `
         <div class="mobile-calendar-tools">
-          <span class="mobile-week-label">${safeText(weekLabel)}</span>
           <div class="mobile-mini-calendar" aria-label="${escapeAttr(t("calendarTitle"))}">
             ${cells.map(cell => {
               const key = calendarCellKey(cell);
@@ -3701,7 +3682,7 @@
               aria-pressed="${adminEditing ? isAdminClosed : isSelected ? "true" : "false"}"
               aria-label="${escapeAttr(label)}"
             >
-              <span class="slot-time">${safeText(label)}</span>
+              <span class="slot-time">${safeText(t("weekdayRequest"))}</span>
               ${adminEditing ? `<span class="slot-admin-state">${safeText(adminState)}</span>` : ""}
             </button>
           </div>
@@ -3768,7 +3749,7 @@
                   <span class="calendar-month-chip">${safeText(label)}</span>
                 `).join("")}
               </div>
-            ${renderMobileCalendarTools(currentWeekKey, cells, selectedMobileKey, mobileWeekLabel(weekDates))}
+            ${renderMobileCalendarTools(currentWeekKey, cells, selectedMobileKey)}
             <div class="calendar-week-row">
               ${cells.map(cell => {
                 const cellKey = calendarCellKey(cell);
