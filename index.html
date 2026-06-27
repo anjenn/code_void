@@ -726,24 +726,6 @@
       display: none;
     }
 
-    .mobile-calendar-search-wrap {
-      display: none;
-    }
-
-    .mobile-calendar-search {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px 13px;
-      border-radius: 14px;
-      border: 1px solid rgba(230, 149, 211, .42);
-      color: #8b518b;
-      background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,235,249,.68));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.44);
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 900;
-    }
-
     .mobile-mini-calendar {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -1679,13 +1661,11 @@
       .section-title, .admin-title { display: block; }
       .section-title h2, .admin-title h2 { font-size: 30px; }
       .concept-grid, .dashboard-grid, .notice-grid, .field-row { grid-template-columns: 1fr; }
-      .mobile-calendar-search-wrap { display: block; margin: 0 0 12px; }
       .mobile-calendar-tools { display: grid; gap: 8px; margin: 0 0 10px; }
       .mobile-week-label { display: block; }
-      .month-calendar:not(.is-mobile-expanded):not(.is-searching) .calendar-week-block.is-mobile-extra { display: none; }
+      .month-calendar:not(.is-mobile-expanded) .calendar-week-block.is-mobile-extra { display: none; }
       .mobile-calendar-more { display: block; margin-top: 10px; }
-      .month-calendar.is-mobile-expanded .mobile-calendar-more,
-      .month-calendar.is-searching .mobile-calendar-more { display: none; }
+      .month-calendar.is-mobile-expanded .mobile-calendar-more { display: none; }
       .calendar-week-row { display: block; overflow: visible; padding-bottom: 0; }
       .calendar-week-row .calendar-day-column { display: none; }
       .calendar-week-row .calendar-day-column.is-mobile-active {
@@ -2498,7 +2478,6 @@
     let currentUser = null;
     let currentAdminUid = "";
     let mobileCalendarSelectionByWeek = {};
-    let mobileCalendarSearch = "";
     let mobileCalendarExpanded = false;
     let authStateCheckId = 0;
     let unsubscribeOrderRecords = null;
@@ -3570,7 +3549,9 @@
       const date = new Date(`${firstDay.iso}T00:00:00`);
       const month = new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", { month: "long" }).format(date);
       const weekNumber = Math.floor((date.getDate() - 1) / 7) + 1;
-      return lang === "ko" ? `${month} ${weekNumber}주차` : `${month} week ${weekNumber}`;
+      if (lang === "ko") return `${month} ${weekNumber}주차`;
+      const suffix = weekNumber === 1 ? "st" : weekNumber === 2 ? "nd" : weekNumber === 3 ? "rd" : "th";
+      return `${weekNumber}${suffix} week of ${month}`;
     }
 
     function calendarCellKey(cell) {
@@ -3607,26 +3588,6 @@
       return `${formatDate(cell.day.iso)} · ${formatWeekday(cell.day.iso)}`;
     }
 
-    function cellSearchText(cell) {
-      const dates = cell.type === "weekdayRange"
-        ? cell.slots.map(slot => slot.date)
-        : cell.type === "unavailableRange"
-          ? cell.days.map(day => day.iso)
-          : [cell.day.iso];
-      return [
-        calendarCellLabel(cell),
-        ...dates,
-        ...dates.map(formatDate),
-        ...dates.map(formatWeekday),
-        cell.type === "day" ? slotsForDate(cell.day.iso).map(slotDisplayLabel).join(" ") : ""
-      ].join(" ").toLowerCase();
-    }
-
-    function cellMatchesMobileSearch(cell) {
-      const query = mobileCalendarSearch.trim().toLowerCase();
-      return !query || cellSearchText(cell).includes(query);
-    }
-
     function miniCellNumber(cell) {
       if (cell.type === "weekdayRange") return `${new Date(`${cell.slots[0].date}T00:00:00`).getDate()}-${new Date(`${cell.slots[cell.slots.length - 1].date}T00:00:00`).getDate()}`;
       if (cell.type === "unavailableRange") return `${new Date(`${cell.days[0].iso}T00:00:00`).getDate()}-${new Date(`${cell.days[cell.days.length - 1].iso}T00:00:00`).getDate()}`;
@@ -3654,16 +3615,13 @@
             ${cells.map(cell => {
               const key = calendarCellKey(cell);
               const unavailable = isUnavailableCell(cell);
-              const hidden = !cellMatchesMobileSearch(cell);
               return `
                 <button
                   class="mobile-mini-day ${key === selectedKey ? "is-active" : ""} ${unavailable ? "is-unavailable" : ""} ${cellHasSelectedSlot(cell) ? "is-selected" : ""}"
                   type="button"
                   data-mobile-week="${escapeAttr(weekId)}"
                   data-mobile-cell-choice="${escapeAttr(key)}"
-                  data-mobile-search-text="${escapeAttr(cellSearchText(cell))}"
                   ${unavailable ? "disabled" : ""}
-                  ${hidden ? "hidden" : ""}
                   aria-pressed="${key === selectedKey ? "true" : "false"}"
                   aria-label="${escapeAttr(calendarCellLabel(cell))}"
                 >
@@ -3791,18 +3749,7 @@
       const adminEditing = document.body.classList.contains("admin-on") && isAdminUser();
 
       grid.innerHTML = `
-        <div class="month-calendar ${mobileCalendarExpanded ? "is-mobile-expanded" : ""} ${mobileCalendarSearch.trim() ? "is-searching" : ""}" aria-label="${escapeAttr(t("calendarTitle"))}">
-          <div class="mobile-calendar-search-wrap">
-            <label class="sr-only">${safeText(t("calendarTitle"))}</label>
-            <input
-              class="mobile-calendar-search"
-              type="search"
-              value="${escapeAttr(mobileCalendarSearch)}"
-              placeholder="${escapeAttr(lang === "ko" ? "날짜, 요일, 시간 검색" : "Search date, day, or time")}"
-              autocomplete="off"
-              data-mobile-calendar-search
-            >
-          </div>
+        <div class="month-calendar ${mobileCalendarExpanded ? "is-mobile-expanded" : ""}" aria-label="${escapeAttr(t("calendarTitle"))}">
           ${weeks.map((weekDates, weekIndex) => {
             const monthLabels = weekMonthLabels(weekDates);
             const cells = visibleWeekCells(weekDates);
@@ -3839,13 +3786,6 @@
           </button>
         </div>
       `;
-
-      grid.querySelectorAll("[data-mobile-calendar-search]").forEach(input => {
-        input.addEventListener("input", () => {
-          mobileCalendarSearch = input.value;
-          applyMobileCalendarSearch(grid);
-        });
-      });
 
       grid.querySelectorAll("[data-mobile-cell-choice]").forEach(button => {
         button.addEventListener("click", () => {
@@ -3887,19 +3827,6 @@
         });
       });
 
-    }
-
-    function applyMobileCalendarSearch(scope = document) {
-      const query = mobileCalendarSearch.trim().toLowerCase();
-      scope.querySelectorAll(".month-calendar").forEach(calendar => {
-        calendar.classList.toggle("is-searching", Boolean(query));
-      });
-      scope.querySelectorAll("[data-mobile-calendar-search]").forEach(input => {
-        if (input.value !== mobileCalendarSearch) input.value = mobileCalendarSearch;
-      });
-      scope.querySelectorAll("[data-mobile-search-text]").forEach(button => {
-        button.hidden = Boolean(query) && !button.getAttribute("data-mobile-search-text").includes(query);
-      });
     }
 
     function renderSelectedSlot() {
