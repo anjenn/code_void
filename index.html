@@ -138,7 +138,6 @@
 
     .nav a,
     .pill-btn,
-    .lang-select,
     .admin-toggle {
       min-height: 38px;
       padding: 9px 13px;
@@ -153,6 +152,7 @@
 
     .nav a:hover,
     .pill-btn:hover,
+    .lang-toggle:hover,
     .admin-toggle:hover {
       transform: translateY(-1px);
       background: rgba(255,255,255,.82);
@@ -165,16 +165,46 @@
       gap: 8px;
     }
 
-    .lang-select {
-      appearance: none;
-      padding-right: 32px;
-      background-image:
-        linear-gradient(45deg, transparent 50%, #b05ab5 50%),
-        linear-gradient(135deg, #b05ab5 50%, transparent 50%),
-        linear-gradient(to right, transparent, transparent);
-      background-position: calc(100% - 18px) 16px, calc(100% - 13px) 16px, 100% 0;
-      background-size: 5px 5px, 5px 5px, 2.5em 2.5em;
-      background-repeat: no-repeat;
+    .lang-toggle {
+      min-height: 38px;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 149, 211, .36);
+      background: rgba(255,255,255,.58);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.46);
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      white-space: nowrap;
+    }
+
+    .lang-toggle button {
+      min-width: 42px;
+      height: 30px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #8b518b;
+      cursor: pointer;
+      font: inherit;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1;
+      transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    .lang-toggle button[aria-pressed="true"] {
+      background: #9b4aa3;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(155, 74, 163, .22);
+    }
+
+    .lang-toggle button:focus-visible {
+      outline: 2px solid #9b4aa3;
+      outline-offset: 2px;
     }
 
     .admin-toggle {
@@ -1715,11 +1745,10 @@
       </nav>
 
       <div class="toolbar">
-        <label class="sr-only" for="languageSelect">Language</label>
-        <select id="languageSelect" class="lang-select" aria-label="Language switcher">
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-        </select>
+        <div class="lang-toggle" role="group" aria-label="Language switcher">
+          <button type="button" data-lang-option="ko" aria-label="Korean" aria-pressed="true">KR</button>
+          <button type="button" data-lang-option="en" aria-label="English" aria-pressed="false">ENG</button>
+        </div>
       </div>
     </header>
 
@@ -2256,10 +2285,10 @@
           cancelled: "취소"
         },
         concepts: {
-          profileA: { title: "프로필 촬영 A", desc: "", price: "₩70,000" },
-          profileB: { title: "프로필 촬영 B", desc: "", price: "₩90,000" },
-          headgear: { title: "컨셉 촬영", desc: "", price: "₩120,000" },
-          package: { title: "개인 유료 커미션", desc: "", price: "₩150,000" }
+          profileA: { title: "프로필 촬영 A", desc: "", price: "₩60,000" },
+          profileB: { title: "프로필 촬영 B", desc: "", price: "₩80,000" },
+          headgear: { title: "컨셉 촬영", desc: "", price: "₩100,000" },
+          package: { title: "개인 유료 커미션", desc: "", price: "₩120,000" }
         }
       },
       en: {
@@ -2443,10 +2472,10 @@
           cancelled: "Cancelled"
         },
         concepts: {
-          profileA: { title: "Profile Shoot A", desc: "", price: "₩70,000" },
-          profileB: { title: "Profile Shoot B", desc: "", price: "₩90,000" },
-          headgear: { title: "Mecha Girl Headgear Concept Shoot", desc: "", price: "₩120,000" },
-          package: { title: "Mecha Girl Package", desc: "Full poster with weapon and headgear composite work", price: "₩150,000" }
+          profileA: { title: "Profile Shoot A", desc: "", price: "₩60,000" },
+          profileB: { title: "Profile Shoot B", desc: "", price: "₩80,000" },
+          headgear: { title: "Mecha Girl Headgear Concept Shoot", desc: "", price: "₩100,000" },
+          package: { title: "Mecha Girl Package", desc: "Full poster with weapon and headgear composite work", price: "₩120,000" }
         }
       }
     };
@@ -3378,7 +3407,9 @@
         const key = el.getAttribute("data-i18n-placeholder");
         el.setAttribute("placeholder", t(key));
       });
-      document.getElementById("languageSelect").value = lang;
+      document.querySelectorAll("[data-lang-option]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.langOption === lang));
+      });
       updateAuthUi();
       renderAll();
     }
@@ -4298,7 +4329,9 @@
     }
 
     function bindEvents() {
-      document.getElementById("languageSelect").addEventListener("change", event => setLanguage(event.target.value));
+      document.querySelectorAll("[data-lang-option]").forEach(button => {
+        button.addEventListener("click", () => setLanguage(button.dataset.langOption));
+      });
       document.getElementById("customerName").addEventListener("input", updateInquiryButtonState);
 
       const adminSwitch = document.getElementById("adminSwitch");
