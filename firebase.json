@@ -9,8 +9,13 @@
   "auth": {
     "providers": {
       "googleSignIn": {
-        "oAuthBrandDisplayName": "Code V01D Studio",
-        "supportEmail": "anjenn9912@gmail.com"
+        "oAuthBrandDisplayName": "Code V01D",
+        "supportEmail": "anjenn9912@gmail.com",
+        "authorizedRedirectUris": [
+          "https://code-void.com/__/auth/handler",
+          "https://arcross-1b910.firebaseapp.com/__/auth/handler",
+          "https://code-v01d.firebaseapp.com/__/auth/handler"
+        ]
       }
     }
   }
