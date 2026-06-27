@@ -440,6 +440,18 @@
       pointer-events: none;
     }
 
+    @supports (content-visibility: auto) {
+      .section,
+      .admin-hub {
+        content-visibility: auto;
+        contain-intrinsic-size: 760px;
+      }
+
+      #calendar {
+        contain-intrinsic-size: 980px;
+      }
+    }
+
     .section-title {
       position: relative;
       z-index: 1;
@@ -523,27 +535,27 @@
     .concept-card:nth-child(3) { --card-a: #fce0ff; --card-b: #d9fff7; }
     .concept-card:nth-child(4) { --card-a: #fff1c9; --card-b: #ffd6ef; }
 
-    .concept-card[data-concept="profileA"] {
+    body.media-ready .concept-card[data-concept="profileA"] {
       background:
         linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(111, 58, 127, .28) 48%, rgba(76, 31, 86, .66) 100%),
         url("assets/profile-a.webp") center 36% / cover no-repeat;
     }
 
-    .concept-card[data-concept="profileB"] {
+    body.media-ready .concept-card[data-concept="profileB"] {
       background:
         linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(120, 68, 156, .22) 42%, rgba(66, 31, 92, .68) 100%),
         url("assets/profile-b.webp") 68% 44% / cover no-repeat;
     }
 
-    .concept-card[data-concept="headgear"] {
+    body.media-ready .concept-card[data-concept="headgear"] {
       background:
         linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(121, 70, 151, .16) 38%, rgba(74, 34, 95, .66) 100%),
         url("assets/concept-shoot.webp") center 42% / cover no-repeat;
     }
 
-    .concept-card[data-concept="profileA"]::before,
-    .concept-card[data-concept="profileB"]::before,
-    .concept-card[data-concept="headgear"]::before {
+    body.media-ready .concept-card[data-concept="profileA"]::before,
+    body.media-ready .concept-card[data-concept="profileB"]::before,
+    body.media-ready .concept-card[data-concept="headgear"]::before {
       inset: 0;
       border: 0;
       border-radius: inherit;
@@ -557,16 +569,16 @@
       z-index: 1;
     }
 
-    .concept-card[data-concept="profileA"] h3,
-    .concept-card[data-concept="profileB"] h3,
-    .concept-card[data-concept="headgear"] h3 {
+    body.media-ready .concept-card[data-concept="profileA"] h3,
+    body.media-ready .concept-card[data-concept="profileB"] h3,
+    body.media-ready .concept-card[data-concept="headgear"] h3 {
       color: #fffaff;
       text-shadow: 0 2px 14px rgba(72, 25, 88, .42);
     }
 
-    .concept-card[data-concept="profileA"] .price-chip,
-    .concept-card[data-concept="profileB"] .price-chip,
-    .concept-card[data-concept="headgear"] .price-chip {
+    body.media-ready .concept-card[data-concept="profileA"] .price-chip,
+    body.media-ready .concept-card[data-concept="profileB"] .price-chip,
+    body.media-ready .concept-card[data-concept="headgear"] .price-chip {
       background: rgba(255,255,255,.78);
     }
 
@@ -756,6 +768,28 @@
     .calendar-day-column.is-weekday {
       display: grid;
       grid-template-rows: auto 1fr;
+    }
+
+    .calendar-day-column.is-weekday-range {
+      flex: 5 0 250px;
+      max-height: 128px;
+    }
+
+    .calendar-day-column.is-weekday-range .calendar-day-head strong {
+      font-size: 15px;
+    }
+
+    .calendar-day-column.is-weekday-range .calendar-slot-list {
+      max-height: none;
+      align-content: stretch;
+    }
+
+    .calendar-day-column.is-weekday-range .slot-btn {
+      min-height: 56px;
+    }
+
+    .slot-btn.is-range .slot-time {
+      font-size: 12px;
     }
 
     .calendar-day-head {
@@ -1505,6 +1539,7 @@
       .concept-grid, .dashboard-grid, .notice-grid, .field-row { grid-template-columns: 1fr; }
       .calendar-week-row { flex-wrap: wrap; overflow-x: visible; padding-bottom: 0; }
       .calendar-day-column { flex: 1 1 calc(50% - 6px); min-width: 126px; max-height: 176px; }
+      .calendar-day-column.is-weekday-range { flex-basis: 100%; max-height: 132px; }
       .calendar-day-head { min-height: 48px; padding: 8px 6px; }
       .calendar-slot-list { max-height: 122px; }
       .concept-card { min-height: 210px; border-radius: 22px; }
@@ -1841,27 +1876,24 @@
 
   <script type="module">
     const sdkBase = "https://www.gstatic.com/" + "fire" + "basejs/11.10.0/";
-    const [appSdk, authSdk, recordSdk] = await Promise.all([
-      import(sdkBase + "fire" + "base-app.js"),
-      import(sdkBase + "fire" + "base-auth.js"),
-      import(sdkBase + "fire" + "base-" + "fire" + "store.js")
-    ]);
-    const { initializeApp } = appSdk;
-    const { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } = authSdk;
-    const {
-      addDoc,
-      collection,
-      deleteDoc,
-      doc,
-      getDoc,
-      onSnapshot,
-      orderBy,
-      query,
-      serverTimestamp,
-      setDoc,
-      updateDoc
-    } = recordSdk;
-    const getRecordStore = recordSdk["get" + "Fire" + "store"];
+    let initializeApp;
+    let getAuth;
+    let GoogleAuthProvider;
+    let onAuthStateChanged;
+    let signInWithPopup;
+    let addDoc;
+    let collection;
+    let deleteDoc;
+    let doc;
+    let getDoc;
+    let onSnapshot;
+    let orderBy;
+    let query;
+    let serverTimestamp;
+    let setDoc;
+    let updateDoc;
+    let getRecordStore;
+    let servicesInitPromise = null;
 
     const LS_PREFIX = "codeV01DStudio.";
     const RECORD_STORE_ID = "code-void-booking";
@@ -2101,13 +2133,13 @@
         viewGuide: "View guide",
         selectConcept: "Select concept",
         calendarTitle: "Booking calendar",
-        weekdayRequest: "Request",
+        weekdayRequest: "Inquire",
         selectedSlotTitle: "Selected slot",
         selectedSlotHelper: "Select all your available time slots.",
-        noSlotSelected: "Choose as many possible slots as you can. Weekend slots are at the Songpa-gu studio; for Monday-Friday, use Request and write your preferred time and location.",
+        noSlotSelected: "Choose as many possible slots as you can. Weekend slots are at the Songpa-gu studio; for Monday-Friday, use Inquire and write your preferred time and location.",
         selectedSlotCount: "{count} slots selected",
         selectedSlotText: "{date} {time}",
-        weekdaySelectedText: "{date} request",
+        weekdaySelectedText: "{date} inquire",
         preferredDetailsText: "Write your preferred time and preferred location in the memo.",
         calendarWindowTitle: "Calendar open window",
         calendarWindowIntro: "Choose the date range visitors can request.",
@@ -2293,33 +2325,74 @@
     let unsubscribeCalendarSettings = null;
     let unsubscribeSlotOverrides = [];
     let unsubscribeReservationRecords = null;
+    let renderAllQueued = false;
 
-    function initializeServices() {
-      try {
-        appInstance = initializeApp(appConfig);
-        authClient = getAuth(appInstance);
-        recordStore = getRecordStore(appInstance, RECORD_STORE_ID);
-        serviceReady = true;
-        subscribeCalendarSettings();
-        subscribeSlotOverrides();
-        onAuthStateChanged(authClient, async user => {
-          currentUser = user;
-          currentUserIsAdmin = false;
+    async function loadRemoteSdk() {
+      if (initializeApp) return;
+      const [appSdk, authSdk, recordSdk] = await Promise.all([
+        import(sdkBase + "fire" + "base-app.js"),
+        import(sdkBase + "fire" + "base-auth.js"),
+        import(sdkBase + "fire" + "base-" + "fire" + "store.js")
+      ]);
+      ({ initializeApp } = appSdk);
+      ({ getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } = authSdk);
+      ({
+        addDoc,
+        collection,
+        deleteDoc,
+        doc,
+        getDoc,
+        onSnapshot,
+        orderBy,
+        query,
+        serverTimestamp,
+        setDoc,
+        updateDoc
+      } = recordSdk);
+      getRecordStore = recordSdk["get" + "Fire" + "store"];
+    }
+
+    async function initializeServices() {
+      if (serviceReady) return true;
+      if (servicesInitPromise) return servicesInitPromise;
+
+      servicesInitPromise = (async () => {
+        try {
+          await loadRemoteSdk();
+          appInstance = initializeApp(appConfig);
+          authClient = getAuth(appInstance);
+          recordStore = getRecordStore(appInstance, RECORD_STORE_ID);
+          serviceReady = true;
+          subscribeCalendarSettings();
+          subscribeSlotOverrides();
+          onAuthStateChanged(authClient, async user => {
+            currentUser = user;
+            currentUserIsAdmin = false;
+            updateAuthUi();
+            if (user) currentUserIsAdmin = await hasAdminAccess(user);
+            updateAuthUi();
+            if (user === currentUser && isAdminUser(user)) {
+              subscribeOrderRecords();
+              subscribeReservations();
+            } else {
+              unsubscribeFromOrderRecords();
+              unsubscribeFromReservations();
+              if (document.body.classList.contains("admin-on")) setAdminMode(false);
+            }
+          });
           updateAuthUi();
-          if (user) currentUserIsAdmin = await hasAdminAccess(user);
-          if (user === currentUser && isAdminUser(user)) {
-            subscribeOrderRecords();
-            subscribeReservations();
-          } else {
-            unsubscribeFromOrderRecords();
-            unsubscribeFromReservations();
-            if (document.body.classList.contains("admin-on")) setAdminMode(false);
-          }
-        });
-      } catch (error) {
-        serviceReady = false;
-        console.warn("Service initialization failed", error);
-      }
+          return true;
+        } catch (error) {
+          serviceReady = false;
+          console.warn("Service initialization failed", error);
+          updateAuthUi();
+          return false;
+        } finally {
+          servicesInitPromise = null;
+        }
+      })();
+
+      return servicesInitPromise;
     }
 
     function isAdminUser(user = currentUser) {
@@ -2343,6 +2416,7 @@
     }
 
     async function signInWithGoogle({ forceAccountSelect = false } = {}) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !authClient) throw new Error("Service is not ready");
       if (currentUser && !forceAccountSelect) return currentUser;
       const provider = new GoogleAuthProvider();
@@ -2390,7 +2464,7 @@
     }
 
     function orderSlotSummary(slotIds) {
-      const labels = slotIds.map(formatSlot).filter(label => label && label !== "—");
+      const labels = compactSlotLabels(slotIds).filter(label => label && label !== "—");
       return labels.join("\n");
     }
 
@@ -2416,6 +2490,7 @@
     }
 
     async function saveOrderRecord(details, source = "public") {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore) return null;
       if (source === "admin" && !isAdminUser()) return null;
       return addDoc(inquiryCollection(), recordPayloadFromOrder(details, source));
@@ -2491,25 +2566,37 @@
       slotOverrides = Object.fromEntries(Object.entries(slotOverrides).filter(([slotId]) => visibleSlotIds.includes(slotId)));
       visibleSlotIds.forEach(slotId => {
         const unsubscribe = onSnapshot(slotOverrideDoc(slotId), snapshot => {
+          let changed = false;
           if (snapshot.exists()) {
             const data = snapshot.data();
-            slotOverrides = {
-              ...slotOverrides,
-              [slotId]: {
+            const nextOverride = {
               slotId: data.slotId || slotId,
               date: data.date || "",
               time: data.time || "",
               kind: data.kind || "",
               closed: Boolean(data.closed)
-              }
+            };
+            const previous = slotOverrides[slotId];
+            changed = !previous ||
+              previous.date !== nextOverride.date ||
+              previous.time !== nextOverride.time ||
+              previous.kind !== nextOverride.kind ||
+              previous.closed !== nextOverride.closed;
+            slotOverrides = {
+              ...slotOverrides,
+              [slotId]: nextOverride
             };
           } else {
+            if (!slotOverrides[slotId]) return;
             const nextOverrides = { ...slotOverrides };
             delete nextOverrides[slotId];
             slotOverrides = nextOverrides;
+            changed = true;
           }
-          saveState();
-          renderAll();
+          if (changed) {
+            saveState();
+            requestRenderAll();
+          }
         }, error => {
           console.warn("Slot override subscription failed", error);
         });
@@ -2518,6 +2605,7 @@
     }
 
     async function saveCalendarSettingsRecord(settings) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore || !isAdminUser()) return null;
       const normalized = normalizeCalendarSettings(settings);
       await setDoc(calendarSettingsDoc(), {
@@ -2529,6 +2617,7 @@
     }
 
     async function saveSlotOverrideRecord(slot, closed) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore || !isAdminUser() || !slot) return null;
       await setDoc(slotOverrideDoc(slot.id), {
         slotId: slot.id,
@@ -2560,6 +2649,7 @@
     }
 
     async function saveReservationRecord(details) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore || !isAdminUser()) return null;
       return addDoc(reservationsCollection(), reservationPayload(details));
     }
@@ -2762,6 +2852,67 @@
       }).format(date);
     }
 
+    function formatShortMonthDay(iso) {
+      const date = new Date(`${iso}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return String(iso || "—");
+      return `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function formatDateRangeShort(startIso, endIso = startIso) {
+      return startIso === endIso
+        ? formatShortMonthDay(startIso)
+        : `${formatShortMonthDay(startIso)}-${formatShortMonthDay(endIso)}`;
+    }
+
+    function isoDateTime(iso) {
+      return new Date(`${iso}T00:00:00`).getTime();
+    }
+
+    function isNextISODate(previousIso, nextIso) {
+      if (!previousIso || !nextIso) return false;
+      return toISODate(addDays(new Date(`${previousIso}T00:00:00`), 1)) === nextIso;
+    }
+
+    function formatWeekdayRangeLabel(rangeSlots) {
+      const dates = rangeSlots.map(slot => slot.date).sort();
+      return `${formatDateRangeShort(dates[0], dates[dates.length - 1])} · ${slotDisplayLabel(rangeSlots[0])}`;
+    }
+
+    function compactSlotLabels(slotIds) {
+      const slotById = new Map(slots.map(slot => [slot.id, slot]));
+      const orderedSlots = [...new Set(slotIds)]
+        .map(slotId => slotById.get(slotId))
+        .filter(Boolean)
+        .sort((a, b) => isoDateTime(a.date) - isoDateTime(b.date) || String(a.time).localeCompare(String(b.time)));
+      const labels = [];
+      let weekdayRange = [];
+
+      const flushWeekdayRange = () => {
+        if (!weekdayRange.length) return;
+        labels.push(formatWeekdayRangeLabel(weekdayRange));
+        weekdayRange = [];
+      };
+
+      orderedSlots.forEach(slot => {
+        if (slot.kind === "weekdayRequest") {
+          const previous = weekdayRange[weekdayRange.length - 1];
+          if (!previous || isNextISODate(previous.date, slot.date)) {
+            weekdayRange.push(slot);
+          } else {
+            flushWeekdayRange();
+            weekdayRange.push(slot);
+          }
+          return;
+        }
+
+        flushWeekdayRange();
+        labels.push(formatSlot(slot.id));
+      });
+
+      flushWeekdayRange();
+      return labels;
+    }
+
     function formatMonthLegend(iso) {
       const date = new Date(`${iso}T00:00:00`);
       if (Number.isNaN(date.getTime())) return String(iso || "—");
@@ -2788,13 +2939,13 @@
     }
 
     function formatOrderSlots(order, separator = " · ") {
-      const labels = orderSlotIds(order).map(formatSlot).filter(label => label && label !== "—");
+      const labels = compactSlotLabels(orderSlotIds(order)).filter(label => label && label !== "—");
       if (!labels.length && order?.slotSummary) return order.slotSummary.split("\n").filter(Boolean).join(separator);
       return labels.length ? labels.join(separator) : "—";
     }
 
     function renderOrderSlotLines(order) {
-      const labels = orderSlotIds(order).map(formatSlot).filter(label => label && label !== "—");
+      const labels = compactSlotLabels(orderSlotIds(order)).filter(label => label && label !== "—");
       if (!labels.length && order?.slotSummary) return order.slotSummary.split("\n").map(label => safeText(label)).join("<br>");
       return labels.length ? labels.map(label => safeText(label)).join("<br>") : "—";
     }
@@ -2805,6 +2956,18 @@
       selectedSlotIds = selectedSlotIds.includes(slotId)
         ? selectedSlotIds.filter(id => id !== slotId)
         : [...selectedSlotIds, slotId];
+    }
+
+    function toggleSlotRangeSelection(slotIds) {
+      const availableIds = slotIds
+        .map(slotId => slots.find(item => item.id === slotId))
+        .filter(slot => slot && !isSlotBlocked(slot))
+        .map(slot => slot.id);
+      if (!availableIds.length) return;
+      const allSelected = availableIds.every(slotId => selectedSlotIds.includes(slotId));
+      selectedSlotIds = allSelected
+        ? selectedSlotIds.filter(slotId => !availableIds.includes(slotId))
+        : [...new Set([...selectedSlotIds, ...availableIds])];
     }
 
     async function toggleAdminSlotClosed(slotId) {
@@ -2842,6 +3005,46 @@
       }
     }
 
+    async function toggleAdminSlotRangeClosed(slotIds) {
+      if (!isAdminUser()) {
+        showToast(t("authRequired"));
+        return;
+      }
+      const rangeSlots = slotIds
+        .map(slotId => slots.find(item => item.id === slotId))
+        .filter(Boolean);
+      if (!rangeSlots.length) return;
+      const nextClosed = !rangeSlots.every(isAdminClosedSlot);
+      const previousOverrides = new Map(rangeSlots.map(slot => [slot.id, slotOverrides[slot.id]]));
+      rangeSlots.forEach(slot => {
+        slotOverrides[slot.id] = {
+          slotId: slot.id,
+          date: slot.date,
+          time: String(slot.time || ""),
+          kind: slot.kind,
+          closed: nextClosed
+        };
+      });
+      saveState();
+      renderAll();
+      try {
+        await Promise.all(rangeSlots.map(slot => saveSlotOverrideRecord(slot, nextClosed)));
+        showToast(t(nextClosed ? "slotClosedByAdmin" : "slotOpenedByAdmin"));
+      } catch (error) {
+        console.warn("Slot range override save failed", error);
+        previousOverrides.forEach((previous, slotId) => {
+          if (previous) {
+            slotOverrides[slotId] = previous;
+          } else {
+            delete slotOverrides[slotId];
+          }
+        });
+        saveState();
+        renderAll();
+        showToast(t("saveFailed"));
+      }
+    }
+
     function hasInvalidSelectedSlot() {
       return selectedSlotIds.some(slotId => {
         const slot = slots.find(item => item.id === slotId);
@@ -2858,7 +3061,7 @@
 
     function composeInquiryMessage({ name, contact, concept, slotIds, memo }) {
       const conceptInfo = t(`concepts.${concept}`);
-      const slotLines = slotIds.map(formatSlot).filter(label => label && label !== "—");
+      const slotLines = compactSlotLabels(slotIds).filter(label => label && label !== "—");
       return [
         t("copyMessageTitle"),
         `${t("copyNameLabel")}: ${String(name || "").trim() || t("anonymous")}`,
@@ -2957,6 +3160,7 @@
 
     function renderConceptOptions(selectId) {
       const select = document.getElementById(selectId);
+      if (!select) return;
       const current = select.value;
       select.innerHTML = `<option value="">${t("selectConcept")}</option>` + conceptMeta.map(({ id }) => {
         const concept = t(`concepts.${id}`);
@@ -3056,6 +3260,104 @@
       return [...new Set(weekDays.filter(day => day.inWindow).map(day => formatMonthLegend(day.iso)))];
     }
 
+    function slotsForDate(date) {
+      return slots
+        .filter(slot => slot.date === date)
+        .sort((a, b) => String(a.time).localeCompare(String(b.time)));
+    }
+
+    function visibleWeekCells(weekDates) {
+      const weekdayRangeSlots = [];
+      const weekendDays = [];
+      weekDates.filter(day => day.inWindow).forEach(day => {
+        const date = new Date(`${day.iso}T00:00:00`);
+        const weekday = date.getDay();
+        if (weekday >= 1 && weekday <= 5) {
+          const requestSlot = slotsForDate(day.iso).find(slot => slot.kind === "weekdayRequest");
+          if (requestSlot) weekdayRangeSlots.push(requestSlot);
+          return;
+        }
+        weekendDays.push(day);
+      });
+
+      return [
+        ...(weekdayRangeSlots.length ? [{ type: "weekdayRange", slots: weekdayRangeSlots }] : []),
+        ...weekendDays.map(day => ({ type: "day", day }))
+      ];
+    }
+
+    function renderWeekdayRangeCell(rangeSlots, adminEditing) {
+      const rangeSlotIds = rangeSlots.map(slot => slot.id);
+      const availableIds = rangeSlots.filter(slot => !isSlotBlocked(slot)).map(slot => slot.id);
+      const isSelected = Boolean(availableIds.length) && availableIds.every(slotId => selectedSlotIds.includes(slotId));
+      const isBlocked = !availableIds.length;
+      const adminClosedCount = rangeSlots.filter(isAdminClosedSlot).length;
+      const isAdminClosed = adminClosedCount === rangeSlots.length;
+      const label = formatWeekdayRangeLabel(rangeSlots);
+      const weekdayLabel = rangeSlots.length === 1
+        ? formatWeekday(rangeSlots[0].date)
+        : `${formatWeekday(rangeSlots[0].date)}-${formatWeekday(rangeSlots[rangeSlots.length - 1].date)}`;
+      const adminState = adminClosedCount
+        ? `${adminClosedCount}/${rangeSlots.length} ${t("adminClosedState")}`
+        : t("adminOpenState");
+
+      return `
+        <section class="calendar-day-column is-weekday is-weekday-range">
+          <div class="calendar-day-head">
+            <strong>${safeText(formatDateRangeShort(rangeSlots[0].date, rangeSlots[rangeSlots.length - 1].date))}</strong>
+            <span>${safeText(weekdayLabel)}</span>
+          </div>
+          <div class="calendar-slot-list">
+            <button
+              class="slot-btn is-request is-range ${isSelected ? "is-selected" : ""} ${isBlocked ? "is-blocked" : ""} ${isAdminClosed ? "is-admin-closed" : ""} ${adminEditing ? "is-admin-edit" : ""}"
+              type="button"
+              data-slot-range="${escapeAttr(rangeSlotIds.join(","))}"
+              ${isBlocked && !adminEditing ? "disabled" : ""}
+              aria-pressed="${adminEditing ? isAdminClosed : isSelected ? "true" : "false"}"
+              aria-label="${escapeAttr(label)}"
+            >
+              <span class="slot-time">${safeText(label)}</span>
+              ${adminEditing ? `<span class="slot-admin-state">${safeText(adminState)}</span>` : ""}
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCalendarDayCell(day, adminEditing) {
+      const date = day.iso;
+      const daySlots = slotsForDate(date);
+      return `
+        <section class="calendar-day-column">
+          <div class="calendar-day-head">
+            <strong>${safeText(new Date(`${date}T00:00:00`).getDate())}</strong>
+            <span>${safeText(formatWeekday(date))}</span>
+          </div>
+          <div class="calendar-slot-list">
+            ${daySlots.map(slot => {
+              const isBlocked = isSlotBlocked(slot);
+              const isAdminClosed = isAdminClosedSlot(slot);
+              const isSelected = selectedSlotIds.includes(slot.id);
+              const isDisabled = isBlocked && !adminEditing;
+              return `
+                <button
+                  class="slot-btn ${isSelected ? "is-selected" : ""} ${isBlocked ? "is-blocked" : ""} ${isAdminClosed ? "is-admin-closed" : ""} ${adminEditing ? "is-admin-edit" : ""}"
+                  type="button"
+                  data-slot-id="${escapeAttr(slot.id)}"
+                  ${isDisabled ? "disabled" : ""}
+                  aria-pressed="${adminEditing ? isAdminClosed : isSelected ? "true" : "false"}"
+                  aria-label="${escapeAttr(`${formatDate(slot.date)} ${slotDisplayLabel(slot)}`)}"
+                >
+                  <span class="slot-time">${safeText(slotDisplayLabel(slot))}</span>
+                  ${adminEditing ? `<span class="slot-admin-state">${safeText(t(isAdminClosed ? "adminClosedState" : "adminOpenState"))}</span>` : ""}
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `;
+    }
+
     function renderCalendar() {
       const grid = document.getElementById("calendarGrid");
       const weeks = futureCalendarWeeks();
@@ -3074,47 +3376,11 @@
                 `).join("")}
               </div>
             <div class="calendar-week-row">
-              ${weekDates.map(day => {
-            const date = day.iso;
-            if (!day.inWindow) {
-              return `
-            <section class="calendar-day-column is-empty" aria-hidden="true"></section>
-          `;
-            }
-            const daySlots = slots
-              .filter(slot => slot.date === date)
-              .sort((a, b) => String(a.time).localeCompare(String(b.time)));
-            const isWeekdayRequest = daySlots.length === 1 && daySlots[0].kind === "weekdayRequest";
-            return `
-            <section class="calendar-day-column ${isWeekdayRequest ? "is-weekday" : ""}">
-              <div class="calendar-day-head">
-                <strong>${safeText(new Date(`${date}T00:00:00`).getDate())}</strong>
-                <span>${safeText(formatWeekday(date))}</span>
-              </div>
-              <div class="calendar-slot-list">
-                ${daySlots.map(slot => {
-                  const isBlocked = isSlotBlocked(slot);
-                  const isAdminClosed = isAdminClosedSlot(slot);
-                  const isSelected = selectedSlotIds.includes(slot.id);
-                  const isDisabled = isBlocked && !adminEditing;
-                  return `
-                    <button
-                      class="slot-btn ${isSelected ? "is-selected" : ""} ${isBlocked ? "is-blocked" : ""} ${isAdminClosed ? "is-admin-closed" : ""} ${adminEditing ? "is-admin-edit" : ""} ${slot.kind === "weekdayRequest" ? "is-request" : ""}"
-                      type="button"
-                      data-slot-id="${escapeAttr(slot.id)}"
-                      ${isDisabled ? "disabled" : ""}
-                      aria-pressed="${adminEditing ? isAdminClosed : isSelected ? "true" : "false"}"
-                      aria-label="${escapeAttr(`${formatDate(slot.date)} ${slotDisplayLabel(slot)}`)}"
-                    >
-                      <span class="slot-time">${safeText(slotDisplayLabel(slot))}</span>
-                      ${adminEditing ? `<span class="slot-admin-state">${safeText(t(isAdminClosed ? "adminClosedState" : "adminOpenState"))}</span>` : ""}
-                    </button>
-                  `;
-                }).join("")}
-              </div>
-            </section>
-          `;
-          }).join("")}
+              ${visibleWeekCells(weekDates).map(cell => (
+                cell.type === "weekdayRange"
+                  ? renderWeekdayRangeCell(cell.slots, adminEditing)
+                  : renderCalendarDayCell(cell.day, adminEditing)
+              )).join("")}
             </div>
             </div>
           `;
@@ -3135,6 +3401,19 @@
         });
       });
 
+      grid.querySelectorAll("[data-slot-range]").forEach(button => {
+        button.addEventListener("click", () => {
+          const slotIds = button.getAttribute("data-slot-range").split(",").filter(Boolean);
+          if (document.body.classList.contains("admin-on") && isAdminUser()) {
+            toggleAdminSlotRangeClosed(slotIds);
+            return;
+          }
+          toggleSlotRangeSelection(slotIds);
+          renderCalendar();
+          renderSelectedSlot();
+        });
+      });
+
     }
 
     function renderSelectedSlot() {
@@ -3150,12 +3429,11 @@
         return;
       }
       const hasWeekdayRequest = selectedSlots.some(slot => slot.kind === "weekdayRequest");
+      const selectedLabels = compactSlotLabels(selectedSlotIds);
       summary.innerHTML = `
-        <p><strong>${safeText(interpolate(t("selectedSlotCount"), { count: selectedSlots.length }))}</strong></p>
+        <p><strong>${safeText(interpolate(t("selectedSlotCount"), { count: selectedLabels.length }))}</strong></p>
         <ul class="selected-slot-list">
-          ${selectedSlots.map(slot => `
-            <li>${safeText(interpolate(t(slot.kind === "weekdayRequest" ? "weekdaySelectedText" : "selectedSlotText"), { date: formatDate(slot.date), time: slotDisplayLabel(slot) }))}</li>
-          `).join("")}
+          ${selectedLabels.map(label => `<li>${safeText(label)}</li>`).join("")}
         </ul>
         ${hasWeekdayRequest ? `<p>${safeText(t("preferredDetailsText"))}</p>` : ""}
       `;
@@ -3420,6 +3698,7 @@
     }
 
     async function updateOrderRecordStatus(order) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore || !isAdminUser() || !order?.recordId) return;
       try {
         await updateDoc(orderRecordDoc(order.recordId), {
@@ -3433,6 +3712,7 @@
     }
 
     async function deleteOrderRecord(order) {
+      if (!serviceReady) await initializeServices();
       if (!serviceReady || !recordStore || !isAdminUser() || !order?.recordId) return;
       try {
         await deleteDoc(orderRecordDoc(order.recordId));
@@ -3475,6 +3755,9 @@
     function renderAll() {
       renderConceptCards();
       renderConceptOptions("conceptSelect");
+      renderCalendar();
+      renderSelectedSlot();
+      if (!document.body.classList.contains("admin-on")) return;
       renderConceptOptions("adminConcept");
       renderConceptOptions("reservationConcept");
       renderSlotOptions();
@@ -3482,14 +3765,21 @@
       renderReservationRequestOptions();
       renderReservationStatusOptions();
       renderCalendarWindowForm();
-      renderCalendar();
-      renderSelectedSlot();
       renderCheckerTable();
       renderRecentOrders();
       renderOrdersTable();
       renderReservationsTable();
       renderKanban();
       renderMetrics();
+    }
+
+    function requestRenderAll() {
+      if (renderAllQueued) return;
+      renderAllQueued = true;
+      requestAnimationFrame(() => {
+        renderAllQueued = false;
+        renderAll();
+      });
     }
 
     function showToast(message) {
@@ -3504,7 +3794,7 @@
       const adminSwitch = document.getElementById("adminSwitch");
       adminSwitch.checked = enabled;
       document.body.classList.toggle("admin-on", enabled);
-      renderCalendar();
+      renderAll();
     }
 
     function showAdminTab(tab) {
@@ -3569,7 +3859,8 @@
       document.getElementById("customerName").addEventListener("input", updateInquiryButtonState);
 
       const adminSwitch = document.getElementById("adminSwitch");
-      setAdminMode(false);
+      adminSwitch.checked = false;
+      document.body.classList.remove("admin-on");
       adminSwitch.addEventListener("change", () => {
         if (adminSwitch.checked) {
           setAdminMode(false);
@@ -3617,22 +3908,29 @@
           slotIds: chosenSlotIds,
           memo: document.getElementById("customerMemo").value
         };
-        let recordId = "";
-        try {
-          const docRef = await saveOrderRecord(inquiryDetails, "public");
-          recordId = docRef?.id || "";
-          if (recordId) showToast(t("saveSucceeded"));
-        } catch (error) {
-          console.warn("Inquiry save failed", error);
-          showToast(t("saveFailed"));
-        }
+        const localOrderId = newId();
         const copyPromise = copyTextToClipboard(composeInquiryMessage(inquiryDetails));
-        selectedSlotIds = [];
-        addOrder({ ...inquiryDetails, id: recordId });
-        event.target.reset();
-        renderSelectedSlot();
         const kakaoWindow = window.open(KAKAO_CHANNEL_URL, "_blank");
         if (kakaoWindow) kakaoWindow.opener = null;
+        selectedSlotIds = [];
+        addOrder({ ...inquiryDetails, id: localOrderId });
+        event.target.reset();
+        renderSelectedSlot();
+        saveOrderRecord(inquiryDetails, "public").then(docRef => {
+          const recordId = docRef?.id || "";
+          if (!recordId) return;
+          const order = orders.find(item => item.id === localOrderId);
+          if (order) {
+            order.id = recordId;
+            order.recordId = recordId;
+            saveState();
+            renderAll();
+          }
+          showToast(t("saveSucceeded"));
+        }).catch(error => {
+          console.warn("Inquiry save failed", error);
+          showToast(t("saveFailed"));
+        });
         copyPromise.then(copied => showToast(t(copied ? "inquiryCopied" : "inquiryCopyFailed")));
         if (!kakaoWindow) window.location.href = KAKAO_CHANNEL_URL;
       });
@@ -3732,10 +4030,29 @@
       storage.set("visits", visits);
     }
 
+    function scheduleAfterFirstPaint(callback) {
+      requestAnimationFrame(() => setTimeout(callback, 0));
+    }
+
+    function runWhenIdle(callback, timeout = 1200) {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(callback, { timeout });
+      } else {
+        setTimeout(callback, timeout);
+      }
+    }
+
+    function queueNonCriticalWork() {
+      scheduleAfterFirstPaint(() => {
+        document.body.classList.add("media-ready");
+        runWhenIdle(() => initializeServices());
+      });
+    }
+
     initVisits();
     bindEvents();
     setLanguage(lang);
-    initializeServices();
+    queueNonCriticalWork();
     updateAuthUi();
   </script>
 </body>
