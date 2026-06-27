@@ -1,0 +1,17 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "edition": "enterprise",
+    "database": "code-void-booking",
+    "location": "asia-northeast3"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Code V01D Studio",
+        "supportEmail": "anjenn9912@gmail.com"
+      }
+    }
+  }
+}

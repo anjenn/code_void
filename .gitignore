@@ -3,5 +3,7 @@
 !.env.example
 node_modules/
 dist/
+firebase-debug.log
+.firebase/
 .DS_Store
 Thumbs.db

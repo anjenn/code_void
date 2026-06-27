@@ -1,0 +1,351 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: inquiries
+    // Document ID: Firestore auto ID
+    // Fields:
+    //   - name: string (required, 1-80 chars)
+    //   - contact: string (required, 0-120 chars)
+    //   - concept: string (required, enum: "", profileA, profileB, headgear, package)
+    //   - slotText: string (required, 0-1200 chars) - human-readable selected slots
+    //   - slotIdsText: string (required, 0-1200 chars) - comma-separated local slot IDs
+    //   - memo: string (required, 0-1000 chars)
+    //   - status: string (required, enum: incoming, styling, shooting, editing, done)
+    //   - source: string (required, enum: public, admin)
+    //   - ownerUid: string (required, immutable after create)
+    //   - ownerEmail: string (required, immutable after create)
+    //   - ownerName: string (required, 0-100 chars)
+    //   - language: string (required, enum: ko, en)
+    //   - createdAt: timestamp (required, immutable after create)
+    //   - updatedAt: timestamp (required)
+    //
+    // Public visitors may create bounded inquiries. Only verified users with
+    // an admin marker document can read, update, or delete inquiries.
+    //
+    // Collection: admins
+    // Document ID: Firebase Auth UID for an approved admin
+    // Fields:
+    //   - role: string (admin)
+    //   - createdAt: timestamp
+    //   - updatedAt: timestamp
+    //
+    // Document: settings/calendar
+    // Fields:
+    //   - openStartDate: string (required, YYYY-MM-DD)
+    //   - openEndDate: string (required, YYYY-MM-DD)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: slotOverrides
+    // Document ID: slot ID (same as slotId)
+    // Fields:
+    //   - slotId: string (required, 1-80 chars)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - time: string (required, request or HH:MM)
+    //   - kind: string (required, enum: time, weekdayRequest)
+    //   - closed: bool (required)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: reservations
+    // Document ID: Firestore auto ID
+    // Fields:
+    //   - requestId: string (required, 0-128 chars) - linked inquiry ID when available
+    //   - name: string (required, 1-80 chars)
+    //   - contact: string (required, 0-120 chars)
+    //   - concept: string (required, enum: "", profileA, profileB, headgear, package)
+    //   - slotId: string (required, 0-80 chars)
+    //   - slotText: string (required, 0-200 chars)
+    //   - status: string (required, enum: confirmed, completed, cancelled)
+    //   - memo: string (required, 0-1000 chars)
+    //   - source: string (required, admin)
+    //   - createdByUid: string (required, immutable after create)
+    //   - language: string (required, enum: ko, en)
+    //   - createdAt: timestamp (required, immutable after create)
+    //   - updatedAt: timestamp (required)
+    // ===============================================================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isCurrentUser(uid) {
+      return isVerifiedUser() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function hasOnlyInquiryFields(data) {
+      return data.keys().hasOnly([
+        "name",
+        "contact",
+        "concept",
+        "slotText",
+        "slotIdsText",
+        "memo",
+        "status",
+        "source",
+        "ownerUid",
+        "ownerEmail",
+        "ownerName",
+        "language",
+        "createdAt",
+        "updatedAt"
+      ]);
+    }
+
+    function hasRequiredInquiryFields(data) {
+      return data.keys().hasAll([
+        "name",
+        "contact",
+        "concept",
+        "slotText",
+        "slotIdsText",
+        "memo",
+        "status",
+        "source",
+        "ownerUid",
+        "ownerEmail",
+        "ownerName",
+        "language",
+        "createdAt",
+        "updatedAt"
+      ]);
+    }
+
+    function validString(value, minSize, maxSize) {
+      return value is string &&
+        value.size() >= minSize &&
+        value.size() <= maxSize;
+    }
+
+    function validEmail(value) {
+      return value is string &&
+        value.size() <= 120 &&
+        value.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$");
+    }
+
+    function validOptionalEmail(value) {
+      return value == "" || validEmail(value);
+    }
+
+    function validDateString(value) {
+      return value is string &&
+        value.matches("^20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]$");
+    }
+
+    function validSlotTime(value) {
+      return value is string &&
+        (value == "request" || value.matches("^[0-2][0-9]:[0-5][0-9]$"));
+    }
+
+    function validInquiryShape(data) {
+      return hasOnlyInquiryFields(data) &&
+        hasRequiredInquiryFields(data) &&
+        validString(data.name, 1, 80) &&
+        validString(data.contact, 0, 120) &&
+        data.concept in ["", "profileA", "profileB", "headgear", "package"] &&
+        validString(data.slotText, 0, 1200) &&
+        validString(data.slotIdsText, 0, 1200) &&
+        validString(data.memo, 0, 1000) &&
+        data.status in ["incoming", "styling", "shooting", "editing", "done"] &&
+        data.source in ["public", "admin"] &&
+        validString(data.ownerUid, 0, 128) &&
+        validOptionalEmail(data.ownerEmail) &&
+        validString(data.ownerName, 0, 100) &&
+        data.language in ["ko", "en"] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function validInquiryCreate(data) {
+      return validInquiryShape(data) &&
+        data.status == "incoming" &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time &&
+        (
+          (
+            data.source == "public" &&
+            data.ownerUid == "" &&
+            data.ownerEmail == "" &&
+            data.ownerName == ""
+          ) ||
+          (
+            data.source == "admin" &&
+            isAdmin() &&
+            data.ownerUid == request.auth.uid &&
+            data.ownerEmail == request.auth.token.email
+          )
+        );
+    }
+
+    function immutableIdentityFieldsUnchanged(data) {
+      return data.ownerUid == resource.data.ownerUid &&
+        data.ownerEmail == resource.data.ownerEmail &&
+        data.source == resource.data.source &&
+        data.createdAt == resource.data.createdAt;
+    }
+
+    function validInquiryAdminUpdate(data) {
+      return isAdmin() &&
+        validInquiryShape(data) &&
+        immutableIdentityFieldsUnchanged(data) &&
+        data.updatedAt == request.time;
+    }
+
+    function validCalendarSettings(data) {
+      return data.keys().hasOnly([
+        "openStartDate",
+        "openEndDate",
+        "updatedAt"
+      ]) &&
+        data.keys().hasAll([
+          "openStartDate",
+          "openEndDate",
+          "updatedAt"
+        ]) &&
+        validDateString(data.openStartDate) &&
+        validDateString(data.openEndDate) &&
+        data.updatedAt is timestamp;
+    }
+
+    function validSlotOverride(slotId, data) {
+      return data.keys().hasOnly([
+        "slotId",
+        "date",
+        "time",
+        "kind",
+        "closed",
+        "updatedAt"
+      ]) &&
+        data.keys().hasAll([
+          "slotId",
+          "date",
+          "time",
+          "kind",
+          "closed",
+          "updatedAt"
+        ]) &&
+        validString(data.slotId, 1, 80) &&
+        data.slotId == slotId &&
+        validDateString(data.date) &&
+        validSlotTime(data.time) &&
+        data.kind in ["time", "weekdayRequest"] &&
+        data.closed is bool &&
+        data.updatedAt is timestamp;
+    }
+
+    function validReservationShape(data) {
+      return data.keys().hasOnly([
+        "requestId",
+        "name",
+        "contact",
+        "concept",
+        "slotId",
+        "slotText",
+        "status",
+        "memo",
+        "source",
+        "createdByUid",
+        "language",
+        "createdAt",
+        "updatedAt"
+      ]) &&
+        data.keys().hasAll([
+          "requestId",
+          "name",
+          "contact",
+          "concept",
+          "slotId",
+          "slotText",
+          "status",
+          "memo",
+          "source",
+          "createdByUid",
+          "language",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        validString(data.requestId, 0, 128) &&
+        validString(data.name, 1, 80) &&
+        validString(data.contact, 0, 120) &&
+        data.concept in ["", "profileA", "profileB", "headgear", "package"] &&
+        validString(data.slotId, 0, 80) &&
+        validString(data.slotText, 0, 200) &&
+        data.status in ["confirmed", "completed", "cancelled"] &&
+        validString(data.memo, 0, 1000) &&
+        data.source == "admin" &&
+        validString(data.createdByUid, 1, 128) &&
+        data.language in ["ko", "en"] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function validReservationCreate(data) {
+      return isAdmin() &&
+        validReservationShape(data) &&
+        data.createdByUid == request.auth.uid &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function validReservationUpdate(data) {
+      return isAdmin() &&
+        validReservationShape(data) &&
+        data.source == resource.data.source &&
+        data.createdByUid == resource.data.createdByUid &&
+        data.createdAt == resource.data.createdAt &&
+        data.updatedAt == request.time;
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if validInquiryCreate(request.resource.data);
+      allow read: if isAdmin();
+      allow update: if validInquiryAdminUpdate(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isCurrentUser(adminUid);
+      allow list, create, update, delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow read: if settingId == "calendar";
+      allow create, update: if settingId == "calendar" &&
+        isAdmin() &&
+        validCalendarSettings(request.resource.data) &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /slotOverrides/{slotId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() &&
+        validSlotOverride(slotId, request.resource.data) &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    match /reservations/{reservationId} {
+      allow create: if validReservationCreate(request.resource.data);
+      allow read: if isAdmin();
+      allow update: if validReservationUpdate(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

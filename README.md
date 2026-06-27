@@ -25,6 +25,14 @@ Then open:
 http://127.0.0.1:4173/
 ```
 
+## Operations
+
+The site has private request intake and admin records.
+
+Public visitors can create booking inquiries without Google sign-in. The 관리자 workspace requires Google sign-in and only opens for approved admin accounts.
+
+Calendar open-window settings and slot close/open states are stored as public non-PII availability data. Incoming inquiries and reservation records are admin-only.
+
 ## Important
 
-The current admin and inquiry storage are browser-only features. Real deployment for customer data requires the backend, authentication, and data protections listed in `security.md`.
+Do not commit private credentials or customer exports. Review `security.md` before broad sharing.

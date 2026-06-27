@@ -892,6 +892,18 @@
       text-decoration: line-through;
     }
 
+    .slot-btn.is-admin-edit {
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .slot-btn.is-admin-closed {
+      border-color: rgba(133, 93, 151, .36);
+      background:
+        repeating-linear-gradient(135deg, rgba(128, 91, 207, .16) 0 7px, rgba(255,255,255,.46) 7px 14px),
+        rgba(255,255,255,.54);
+    }
+
     .slot-time {
       display: flex;
       align-items: center;
@@ -901,6 +913,30 @@
       font-weight: 800;
       color: #8f4e9b;
       text-align: center;
+    }
+
+    .slot-admin-state {
+      display: block;
+      margin-top: 2px;
+      font-family: var(--sans);
+      font-size: 9px;
+      font-weight: 900;
+      color: #a45e9d;
+      line-height: 1;
+    }
+
+    .linked-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(216, 77, 149, .22);
+      background: rgba(255,255,255,.58);
+      color: #8f4e9b;
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 900;
     }
 
     .slot-panel,
@@ -1571,7 +1607,7 @@
               <select class="field" id="conceptSelect"></select>
               <textarea class="field" id="customerMemo" data-i18n-placeholder="memoPlaceholder" placeholder="예: 문의 / 예약 내용을 적어주세요"></textarea>
               <button class="primary-btn" id="inquiryButton" type="submit" data-i18n="inquiryButton">문의 내용 복사 + 카카오채널 열기</button>
-              <p class="form-note" data-i18n="autoSaveNote">문의 내용은 자동으로 서버에 저장됩니다.</p>
+              <p class="form-note" data-i18n="autoSaveNote">문의 내용은 자동으로 저장되며, 악용 시 서비스 이용이 제한될 수 있습니다.</p>
             </form>
           </aside>
         </div>
@@ -1591,6 +1627,7 @@
           <button class="admin-tab is-active" data-tab="checker" type="button" data-i18n="tabChecker">캘린더 체크</button>
           <button class="admin-tab" data-tab="kanban" type="button" data-i18n="tabKanban">칸반 관리</button>
           <button class="admin-tab" data-tab="orders" type="button" data-i18n="tabOrders">인입 주문</button>
+          <button class="admin-tab" data-tab="reservations" type="button" data-i18n="tabReservations">예약 기록</button>
           <button class="admin-tab" data-tab="insights" type="button" data-i18n="tabInsights">인사이트</button>
         </div>
 
@@ -1616,6 +1653,16 @@
               <h3 data-i18n="recentOrdersTitle">최근 인입</h3>
               <div id="recentOrdersList"></div>
             </div>
+            <form class="mini-panel orders-form" id="calendarWindowForm">
+              <h3 data-i18n="calendarWindowTitle">캘린더 공개 기간</h3>
+              <p class="form-note" data-i18n="calendarWindowIntro">방문자에게 열어둘 날짜 범위를 정합니다.</p>
+              <label class="sr-only" for="calendarOpenStart" data-i18n="calendarOpenStartLabel">공개 시작일</label>
+              <input class="field" id="calendarOpenStart" type="date" required>
+              <label class="sr-only" for="calendarOpenEnd" data-i18n="calendarOpenEndLabel">공개 종료일</label>
+              <input class="field" id="calendarOpenEnd" type="date" required>
+              <button class="primary-btn" type="submit" data-i18n="saveCalendarWindow">공개 기간 저장</button>
+              <p class="form-note" data-i18n="adminSlotToggleHint">관리자 모드에서는 캘린더 슬롯을 눌러 마감/오픈을 전환할 수 있습니다.</p>
+            </form>
           </div>
         </div>
 
@@ -1633,12 +1680,13 @@
                   <tr>
                     <th scope="col" data-i18n="orderName">이름</th>
                     <th scope="col" data-i18n="orderConcept">컨셉</th>
-                    <th scope="col" data-i18n="orderSlot">슬롯</th>
-                    <th scope="col" data-i18n="orderStatus">상태</th>
-                    <th scope="col" data-i18n="orderMemo">메모</th>
-                  </tr>
-                </thead>
-                <tbody id="ordersTableBody"></tbody>
+	                    <th scope="col" data-i18n="orderSlot">슬롯</th>
+	                    <th scope="col" data-i18n="orderStatus">상태</th>
+	                    <th scope="col" data-i18n="orderMemo">메모</th>
+	                    <th scope="col" data-i18n="orderReservation">예약 연결</th>
+	                  </tr>
+	                </thead>
+	                <tbody id="ordersTableBody"></tbody>
               </table>
             </div>
             <form class="mini-panel orders-form" id="adminAddOrderForm">
@@ -1649,6 +1697,41 @@
               <select class="field" id="adminSlot" required></select>
               <textarea class="field" id="adminMemo" data-i18n-placeholder="adminMemoPlaceholder" placeholder="관리 메모"></textarea>
               <button class="primary-btn" type="submit" data-i18n="addIncomingOrder">인입 주문 추가</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="admin-panel" id="panel-reservations">
+          <div class="admin-split">
+            <div class="mini-panel">
+              <h3 data-i18n="reservationsTitle">예약 기록</h3>
+              <table class="order-table">
+                <caption class="sr-only" data-i18n="reservationsTitle">예약 기록</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" data-i18n="orderName">이름</th>
+                    <th scope="col" data-i18n="requestLink">요청 연결</th>
+                    <th scope="col" data-i18n="reservationSlot">확정 슬롯</th>
+                    <th scope="col" data-i18n="reservationStatus">예약 상태</th>
+                    <th scope="col" data-i18n="reservationMemo">예약 메모</th>
+                  </tr>
+                </thead>
+                <tbody id="reservationsTableBody"></tbody>
+              </table>
+            </div>
+            <form class="mini-panel orders-form" id="reservationRecordForm">
+              <h3 data-i18n="reservationRecordTitle">예약 기록 추가</h3>
+              <label class="sr-only" for="reservationRequest" data-i18n="reservationRequestLabel">연결할 요청</label>
+              <select class="field" id="reservationRequest"></select>
+              <input class="field" id="reservationName" type="text" data-i18n-placeholder="namePlaceholder" placeholder="이름" required>
+              <input class="field" id="reservationContact" type="text" data-i18n-placeholder="contactPlaceholder" placeholder="연락처 / 이메일">
+              <select class="field" id="reservationConcept" required></select>
+              <label class="sr-only" for="reservationSlot" data-i18n="reservationSlot">확정 슬롯</label>
+              <select class="field" id="reservationSlot" required></select>
+              <label class="sr-only" for="reservationStatus" data-i18n="reservationStatus">예약 상태</label>
+              <select class="field" id="reservationStatus"></select>
+              <textarea class="field" id="reservationMemo" data-i18n-placeholder="reservationMemo" placeholder="예약 메모"></textarea>
+              <button class="primary-btn" type="submit" data-i18n="addReservation">예약 기록 추가</button>
             </form>
           </div>
         </div>
@@ -1746,27 +1829,57 @@
 
   <div class="admin-lock" id="adminLock" role="dialog" aria-modal="true" aria-labelledby="adminLockTitle">
     <form class="admin-lock-panel" id="adminLockForm">
-      <h2 id="adminLockTitle" data-i18n="adminPasswordTitle">관리자 비밀번호</h2>
-      <p data-i18n="adminPasswordIntro">관리자 모드를 열려면 비밀번호를 입력하세요.</p>
-      <label class="sr-only" for="adminPassword" data-i18n="adminPasswordLabel">비밀번호</label>
-      <input class="field" id="adminPassword" type="password" autocomplete="current-password" data-i18n-placeholder="adminPasswordPlaceholder" placeholder="비밀번호" required>
+      <h2 id="adminLockTitle" data-i18n="adminPasswordTitle">관리자 로그인</h2>
+      <p data-i18n="adminPasswordIntro">Google 계정으로 관리자 모드를 열어주세요.</p>
+      <p id="adminAuthInfo" class="form-note"></p>
       <div class="admin-lock-actions">
         <button class="secondary-btn" id="adminCancelButton" type="button" data-i18n="adminPasswordCancel">취소</button>
-        <button class="primary-btn" type="submit" data-i18n="adminPasswordSubmit">열기</button>
+        <button class="primary-btn" id="adminGoogleButton" type="submit" data-i18n="adminPasswordSubmit">Google로 열기</button>
       </div>
     </form>
   </div>
 
-  <script>
+  <script type="module">
+    const sdkBase = "https://www.gstatic.com/" + "fire" + "basejs/11.10.0/";
+    const [appSdk, authSdk, recordSdk] = await Promise.all([
+      import(sdkBase + "fire" + "base-app.js"),
+      import(sdkBase + "fire" + "base-auth.js"),
+      import(sdkBase + "fire" + "base-" + "fire" + "store.js")
+    ]);
+    const { initializeApp } = appSdk;
+    const { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } = authSdk;
+    const {
+      addDoc,
+      collection,
+      deleteDoc,
+      doc,
+      getDoc,
+      onSnapshot,
+      orderBy,
+      query,
+      serverTimestamp,
+      setDoc,
+      updateDoc
+    } = recordSdk;
+    const getRecordStore = recordSdk["get" + "Fire" + "store"];
+
     const LS_PREFIX = "codeV01DStudio.";
-    const ADMIN_PASSWORD = "codevoid";
+    const RECORD_STORE_ID = "code-void-booking";
     const KAKAO_CHANNEL_URL = "http://pf.kakao.com/_dxfKKX/chat";
     const PROFILE_GUIDE_URL = "https://blog.naver.com/code_v01d/224328830243";
     const CONCEPT_GUIDE_URL = "https://blog.naver.com/code_v01d/224328857251";
-    const SLOT_DATA_VERSION = 9;
-    const FUTURE_WEEK_COUNT = 4;
-    const SLOT_HORIZON_DAYS = FUTURE_WEEK_COUNT * 7;
+    const SLOT_DATA_VERSION = 11;
+    const DEFAULT_CALENDAR_OPEN_DAYS = 30;
     const SLOT_CLOSE_WINDOW_MS = 60 * 60 * 1000;
+    const appConfig = {
+      apiKey: "AIzaSyDsYlsmaK_eyh-FskxAF_hlY0-wdUMlmaw",
+      authDomain: "arcross-1b910." + "fire" + "baseapp.com",
+      projectId: "arcross-1b910",
+      storageBucket: "arcross-1b910." + "fire" + "basestorage.app",
+      messagingSenderId: "59050851856",
+      appId: "1:59050851856:web:c5b87067805c382f291495",
+      measurementId: "G-34D025NSWQ"
+    };
     const storage = {
       get(key, fallback) {
         try {
@@ -1811,6 +1924,31 @@
         selectedSlotText: "{date} {time}",
         weekdaySelectedText: "{date} 요청하기",
         preferredDetailsText: "선호 시간대, 선호 위치를 메모에 적어주세요.",
+        calendarWindowTitle: "캘린더 공개 기간",
+        calendarWindowIntro: "방문자에게 열어둘 날짜 범위를 정합니다.",
+        calendarOpenStartLabel: "공개 시작일",
+        calendarOpenEndLabel: "공개 종료일",
+        saveCalendarWindow: "공개 기간 저장",
+        calendarWindowSaved: "캘린더 공개 기간이 저장되었습니다.",
+        calendarWindowInvalid: "공개 종료일은 시작일 이후로 설정해 주세요.",
+        adminSlotToggleHint: "관리자 모드에서는 캘린더 슬롯을 눌러 마감/오픈을 전환할 수 있습니다.",
+        adminClosedState: "마감",
+        adminOpenState: "오픈",
+        slotClosedByAdmin: "슬롯이 마감 처리되었습니다.",
+        slotOpenedByAdmin: "슬롯이 다시 열렸습니다.",
+        googleSignIn: "Google로 로그인",
+        googleSignOut: "로그아웃",
+        authSignedOut: "관리자 계정으로 Google 로그인해 주세요.",
+        authSignedIn: "Google 계정으로 로그인 중",
+        adminSignedInAs: "관리자 계정으로 로그인되어 있습니다.",
+        adminWrongAccountInfo: "관리자 권한이 없는 계정입니다. 관리자 계정으로 다시 로그인해 주세요.",
+        adminGoogleOnlyInfo: "관리자 모드는 승인된 Google 계정으로만 열 수 있습니다.",
+        serviceReady: "연결 준비 완료",
+        connectionUnavailable: "연결을 확인할 수 없습니다. 카카오채널 문의는 계속 가능합니다.",
+        saveSucceeded: "문의 내용이 저장되었습니다.",
+        saveFailed: "저장에 실패했습니다. 카카오채널로 문의 내용을 보내주세요.",
+        loadFailed: "주문을 불러오지 못했습니다.",
+        authRequired: "관리자 작업에는 Google 로그인이 필요합니다.",
         namePlaceholder: "이름",
         contactPlaceholder: "연락처 / 이메일",
         memoPlaceholder: "예: 문의 / 예약 내용을 적어주세요",
@@ -1828,22 +1966,23 @@
         copyConceptLabel: "컨셉",
         copySlotsLabel: "후보 슬롯",
         copyMemoLabel: "메모",
-        autoSaveNote: "문의 내용은 자동으로 서버에 저장됩니다.",
+        autoSaveNote: "문의 내용은 자동으로 저장되며, 악용 시 서비스 이용이 제한될 수 있습니다.",
         adminKicker: "Admin workspace",
         adminTitle: "운영 모드",
-        adminIntro: "상단 스위치로 열리는 관리자 목업입니다. 캘린더 확인, 칸반 관리, 주문 추가, 방문 인사이트를 한 곳에서 확인합니다.",
+        adminIntro: "Google 관리자 로그인으로 열리는 운영 화면입니다. 캘린더 확인, 칸반 관리, 주문 추가, 방문 인사이트를 한 곳에서 확인합니다.",
         adminStatus: "관리자 보기 켜짐",
-        adminPasswordTitle: "관리자 비밀번호",
-        adminPasswordIntro: "관리자 모드를 열려면 비밀번호를 입력하세요.",
-        adminPasswordLabel: "비밀번호",
-        adminPasswordPlaceholder: "비밀번호",
+        adminPasswordTitle: "관리자 로그인",
+        adminPasswordIntro: "Google 계정으로 관리자 모드를 열어주세요.",
+        adminPasswordLabel: "관리자 로그인",
+        adminPasswordPlaceholder: "Google 계정",
         adminPasswordCancel: "취소",
-        adminPasswordSubmit: "열기",
-        adminPasswordWrong: "비밀번호가 맞지 않습니다.",
+        adminPasswordSubmit: "Google로 열기",
+        adminPasswordWrong: "관리자 권한이 있는 Google 계정으로 로그인해 주세요.",
         adminUnlocked: "관리자 모드가 열렸습니다.",
         tabChecker: "캘린더 체크",
         tabKanban: "칸반 관리",
         tabOrders: "인입 주문",
+        tabReservations: "예약 기록",
         tabInsights: "인사이트",
         checkerTitle: "슬롯별 요청 현황",
         tableDate: "날짜",
@@ -1858,9 +1997,24 @@
         orderSlot: "후보 슬롯",
         orderStatus: "상태",
         orderMemo: "메모",
+        orderReservation: "예약 연결",
+        requestLink: "요청 연결",
+        fillReservation: "예약 기록으로 연결",
         manualAddTitle: "주문 수동 추가",
         addIncomingOrder: "인입 주문 추가",
         orderAdded: "인입 주문이 추가되었습니다.",
+        reservationsTitle: "예약 기록",
+        reservationRecordTitle: "예약 기록 추가",
+        reservationRequestLabel: "연결할 요청",
+        manualReservationOption: "요청 없이 직접 추가",
+        reservationSlot: "확정 슬롯",
+        reservationStatus: "예약 상태",
+        reservationMemo: "예약 메모",
+        addReservation: "예약 기록 추가",
+        reservationAdded: "예약 기록이 추가되었습니다.",
+        noReservations: "아직 예약 기록이 없습니다.",
+        reservationManual: "수동 기록",
+        reservationLinkedTo: "요청 #{id}",
         popularConcepts: "인기 컨셉",
         visits: "방문 수",
         inquiries: "문의 수",
@@ -1918,6 +2072,11 @@
           editing: "보정",
           done: "완료"
         },
+        reservationStatuses: {
+          confirmed: "확정",
+          completed: "완료",
+          cancelled: "취소"
+        },
         concepts: {
           profileA: { title: "프로필 촬영 A", desc: "", price: "₩70,000" },
           profileB: { title: "프로필 촬영 B", desc: "", price: "₩90,000" },
@@ -1950,6 +2109,31 @@
         selectedSlotText: "{date} {time}",
         weekdaySelectedText: "{date} request",
         preferredDetailsText: "Write your preferred time and preferred location in the memo.",
+        calendarWindowTitle: "Calendar open window",
+        calendarWindowIntro: "Choose the date range visitors can request.",
+        calendarOpenStartLabel: "Open from",
+        calendarOpenEndLabel: "Open until",
+        saveCalendarWindow: "Save open window",
+        calendarWindowSaved: "Calendar open window saved.",
+        calendarWindowInvalid: "Set the end date after the start date.",
+        adminSlotToggleHint: "In admin mode, click calendar slots to toggle closed/open.",
+        adminClosedState: "Closed",
+        adminOpenState: "Open",
+        slotClosedByAdmin: "Slot closed.",
+        slotOpenedByAdmin: "Slot reopened.",
+        googleSignIn: "Sign in with Google",
+        googleSignOut: "Sign out",
+        authSignedOut: "Sign in with the admin Google account.",
+        authSignedIn: "Signed in with Google",
+        adminSignedInAs: "Signed in with an admin account.",
+        adminWrongAccountInfo: "This account does not have admin access. Sign in again with an approved admin account.",
+        adminGoogleOnlyInfo: "Admin mode can only open with an approved Google account.",
+        serviceReady: "Connection ready",
+        connectionUnavailable: "Connection is unavailable. Kakao inquiry still works.",
+        saveSucceeded: "Inquiry saved.",
+        saveFailed: "Saving failed. Please send the copied inquiry through Kakao Channel.",
+        loadFailed: "Could not load orders.",
+        authRequired: "Google sign-in is required for admin actions.",
         namePlaceholder: "Name",
         contactPlaceholder: "Contact / email",
         memoPlaceholder: "Example: inquiry / booking details",
@@ -1967,22 +2151,23 @@
         copyConceptLabel: "Concept",
         copySlotsLabel: "Candidate slots",
         copyMemoLabel: "Memo",
-        autoSaveNote: "Inquiry details are automatically saved to the server.",
+        autoSaveNote: "Inquiry details are saved automatically, and misuse may result in service restrictions.",
         adminKicker: "Admin workspace",
         adminTitle: "Operations mode",
-        adminIntro: "This admin workspace opens from the top switch. Check the calendar, manage a kanban board, add incoming orders, and view visit insights.",
+        adminIntro: "This operations workspace opens with Google admin sign-in. Check the calendar, manage a kanban board, add incoming orders, and view visit insights.",
         adminStatus: "Admin view on",
-        adminPasswordTitle: "Admin password",
-        adminPasswordIntro: "Enter the password to open admin mode.",
-        adminPasswordLabel: "Password",
-        adminPasswordPlaceholder: "Password",
+        adminPasswordTitle: "Admin sign-in",
+        adminPasswordIntro: "Use a Google account to open admin mode.",
+        adminPasswordLabel: "Admin sign-in",
+        adminPasswordPlaceholder: "Google account",
         adminPasswordCancel: "Cancel",
-        adminPasswordSubmit: "Open",
-        adminPasswordWrong: "The password is incorrect.",
+        adminPasswordSubmit: "Open with Google",
+        adminPasswordWrong: "Sign in with a Google account that has admin access.",
         adminUnlocked: "Admin mode opened.",
         tabChecker: "Calendar checker",
         tabKanban: "Kanban management",
         tabOrders: "Incoming orders",
+        tabReservations: "Reservation records",
         tabInsights: "Insights",
         checkerTitle: "Requests by slot",
         tableDate: "Date",
@@ -1997,9 +2182,24 @@
         orderSlot: "Candidate slots",
         orderStatus: "Status",
         orderMemo: "Memo",
+        orderReservation: "Reservation link",
+        requestLink: "Request link",
+        fillReservation: "Link as reservation",
         manualAddTitle: "Manual order add",
         addIncomingOrder: "Add incoming order",
         orderAdded: "Incoming order added.",
+        reservationsTitle: "Reservation records",
+        reservationRecordTitle: "Add reservation record",
+        reservationRequestLabel: "Linked request",
+        manualReservationOption: "Manual record without request",
+        reservationSlot: "Confirmed slot",
+        reservationStatus: "Reservation status",
+        reservationMemo: "Reservation memo",
+        addReservation: "Add reservation record",
+        reservationAdded: "Reservation record added.",
+        noReservations: "No reservation records yet.",
+        reservationManual: "Manual record",
+        reservationLinkedTo: "Request #{id}",
         popularConcepts: "Popular concepts",
         visits: "Visits",
         inquiries: "Inquiries",
@@ -2057,6 +2257,11 @@
           editing: "Editing",
           done: "Done"
         },
+        reservationStatuses: {
+          confirmed: "Confirmed",
+          completed: "Completed",
+          cancelled: "Cancelled"
+        },
         concepts: {
           profileA: { title: "Profile Shoot A", desc: "", price: "₩70,000" },
           profileB: { title: "Profile Shoot B", desc: "", price: "₩90,000" },
@@ -2074,10 +2279,327 @@
     ];
 
     const statusOrder = ["incoming", "styling", "shooting", "editing", "done"];
-    const weekendSlotTimes = ["11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+    const weekendSlotTimes = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
     let lang = storage.get("lang", "ko");
     let selectedSlotIds = [];
     let draggedOrderId = null;
+    let serviceReady = false;
+    let appInstance = null;
+    let authClient = null;
+    let recordStore = null;
+    let currentUser = null;
+    let currentUserIsAdmin = false;
+    let unsubscribeOrderRecords = null;
+    let unsubscribeCalendarSettings = null;
+    let unsubscribeSlotOverrides = [];
+    let unsubscribeReservationRecords = null;
+
+    function initializeServices() {
+      try {
+        appInstance = initializeApp(appConfig);
+        authClient = getAuth(appInstance);
+        recordStore = getRecordStore(appInstance, RECORD_STORE_ID);
+        serviceReady = true;
+        subscribeCalendarSettings();
+        subscribeSlotOverrides();
+        onAuthStateChanged(authClient, async user => {
+          currentUser = user;
+          currentUserIsAdmin = false;
+          updateAuthUi();
+          if (user) currentUserIsAdmin = await hasAdminAccess(user);
+          if (user === currentUser && isAdminUser(user)) {
+            subscribeOrderRecords();
+            subscribeReservations();
+          } else {
+            unsubscribeFromOrderRecords();
+            unsubscribeFromReservations();
+            if (document.body.classList.contains("admin-on")) setAdminMode(false);
+          }
+        });
+      } catch (error) {
+        serviceReady = false;
+        console.warn("Service initialization failed", error);
+      }
+    }
+
+    function isAdminUser(user = currentUser) {
+      return Boolean(user && user.emailVerified && currentUserIsAdmin && user.uid === currentUser?.uid);
+    }
+
+    function updateAuthUi() {
+      const adminInfo = document.getElementById("adminAuthInfo");
+
+      if (adminInfo) {
+        if (!serviceReady) {
+          adminInfo.textContent = t("connectionUnavailable");
+        } else if (isAdminUser()) {
+          adminInfo.textContent = t("adminSignedInAs");
+        } else if (currentUser) {
+          adminInfo.textContent = t("adminWrongAccountInfo");
+        } else {
+          adminInfo.textContent = t("adminGoogleOnlyInfo");
+        }
+      }
+    }
+
+    async function signInWithGoogle({ forceAccountSelect = false } = {}) {
+      if (!serviceReady || !authClient) throw new Error("Service is not ready");
+      if (currentUser && !forceAccountSelect) return currentUser;
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const result = await signInWithPopup(authClient, provider);
+      currentUser = result.user;
+      currentUserIsAdmin = await hasAdminAccess(result.user);
+      updateAuthUi();
+      return result.user;
+    }
+
+    async function hasAdminAccess(user) {
+      if (!serviceReady || !recordStore || !user?.uid || !user.emailVerified) return false;
+      try {
+        const snapshot = await getDoc(adminMarkerDoc(user.uid));
+        return snapshot.exists();
+      } catch (error) {
+        console.warn("Admin marker check failed", error);
+        return false;
+      }
+    }
+
+    function inquiryCollection() {
+      return collection(recordStore, "inquiries");
+    }
+
+    function orderRecordDoc(orderId) {
+      return doc(recordStore, "inquiries", orderId);
+    }
+
+    function adminMarkerDoc(uid) {
+      return doc(recordStore, "admins", uid);
+    }
+
+    function calendarSettingsDoc() {
+      return doc(recordStore, "settings", "calendar");
+    }
+
+    function slotOverrideDoc(slotId) {
+      return doc(recordStore, "slotOverrides", slotId);
+    }
+
+    function reservationsCollection() {
+      return collection(recordStore, "reservations");
+    }
+
+    function orderSlotSummary(slotIds) {
+      const labels = slotIds.map(formatSlot).filter(label => label && label !== "—");
+      return labels.join("\n");
+    }
+
+    function recordPayloadFromOrder({ name, contact, concept, slotIds, memo }, source = "public") {
+      const cleanSlotIds = [...new Set((Array.isArray(slotIds) ? slotIds : []).filter(Boolean))].slice(0, 20);
+      const owner = source === "admin" ? currentUser : null;
+      return {
+        name: String(name || "").trim() || t("anonymous"),
+        contact: String(contact || "").trim(),
+        concept: String(concept || ""),
+        slotText: orderSlotSummary(cleanSlotIds),
+        slotIdsText: cleanSlotIds.join(","),
+        memo: String(memo || "").trim(),
+        status: "incoming",
+        source,
+        ownerUid: owner?.uid || "",
+        ownerEmail: owner?.email || "",
+        ownerName: owner?.displayName || "",
+        language: lang,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+    }
+
+    async function saveOrderRecord(details, source = "public") {
+      if (!serviceReady || !recordStore) return null;
+      if (source === "admin" && !isAdminUser()) return null;
+      return addDoc(inquiryCollection(), recordPayloadFromOrder(details, source));
+    }
+
+    function recordSnapshotToOrder(docSnapshot) {
+      const data = docSnapshot.data();
+      const slotIds = String(data.slotIdsText || "").split(",").map(item => item.trim()).filter(Boolean);
+      return {
+        id: docSnapshot.id,
+        recordId: docSnapshot.id,
+        name: data.name || t("anonymous"),
+        contact: data.contact || "",
+        concept: data.concept || "",
+        slotId: slotIds[0] || "",
+        slotIds,
+        slotSummary: data.slotText || "",
+        status: statusOrder.includes(data.status) ? data.status : "incoming",
+        memo: data.memo || "",
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
+      };
+    }
+
+    function unsubscribeFromOrderRecords() {
+      if (unsubscribeOrderRecords) {
+        unsubscribeOrderRecords();
+        unsubscribeOrderRecords = null;
+      }
+    }
+
+    function subscribeOrderRecords() {
+      if (!serviceReady || !recordStore || unsubscribeOrderRecords) return;
+      const q = query(inquiryCollection(), orderBy("createdAt", "desc"));
+      unsubscribeOrderRecords = onSnapshot(q, snapshot => {
+        orders = snapshot.docs.map(recordSnapshotToOrder);
+        saveState();
+        renderAll();
+      }, error => {
+        console.warn("Order subscription failed", error);
+        showToast(t("loadFailed"));
+      });
+    }
+
+    function rebuildSlotsFromCalendarSettings(nextSettings) {
+      calendarSettings = normalizeCalendarSettings(nextSettings);
+      slots = makeSlots(calendarSettings, slots);
+      selectedSlotIds = selectedSlotIds.filter(slotId => slots.some(slot => slot.id === slotId));
+      saveState();
+      subscribeSlotOverrides();
+      renderAll();
+    }
+
+    function subscribeCalendarSettings() {
+      if (!serviceReady || !recordStore || unsubscribeCalendarSettings) return;
+      unsubscribeCalendarSettings = onSnapshot(calendarSettingsDoc(), snapshot => {
+        if (snapshot.exists()) {
+          rebuildSlotsFromCalendarSettings(snapshot.data());
+        }
+      }, error => {
+        console.warn("Calendar settings subscription failed", error);
+      });
+    }
+
+    function unsubscribeFromSlotOverrides() {
+      unsubscribeSlotOverrides.forEach(unsubscribe => unsubscribe());
+      unsubscribeSlotOverrides = [];
+    }
+
+    function subscribeSlotOverrides() {
+      if (!serviceReady || !recordStore || !slots.length) return;
+      unsubscribeFromSlotOverrides();
+      const visibleSlotIds = [...new Set(slots.map(slot => slot.id))];
+      slotOverrides = Object.fromEntries(Object.entries(slotOverrides).filter(([slotId]) => visibleSlotIds.includes(slotId)));
+      visibleSlotIds.forEach(slotId => {
+        const unsubscribe = onSnapshot(slotOverrideDoc(slotId), snapshot => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            slotOverrides = {
+              ...slotOverrides,
+              [slotId]: {
+              slotId: data.slotId || slotId,
+              date: data.date || "",
+              time: data.time || "",
+              kind: data.kind || "",
+              closed: Boolean(data.closed)
+              }
+            };
+          } else {
+            const nextOverrides = { ...slotOverrides };
+            delete nextOverrides[slotId];
+            slotOverrides = nextOverrides;
+          }
+          saveState();
+          renderAll();
+        }, error => {
+          console.warn("Slot override subscription failed", error);
+        });
+        unsubscribeSlotOverrides.push(unsubscribe);
+      });
+    }
+
+    async function saveCalendarSettingsRecord(settings) {
+      if (!serviceReady || !recordStore || !isAdminUser()) return null;
+      const normalized = normalizeCalendarSettings(settings);
+      await setDoc(calendarSettingsDoc(), {
+        openStartDate: normalized.openStartDate,
+        openEndDate: normalized.openEndDate,
+        updatedAt: serverTimestamp()
+      });
+      return normalized;
+    }
+
+    async function saveSlotOverrideRecord(slot, closed) {
+      if (!serviceReady || !recordStore || !isAdminUser() || !slot) return null;
+      await setDoc(slotOverrideDoc(slot.id), {
+        slotId: slot.id,
+        date: slot.date,
+        time: String(slot.time || ""),
+        kind: slot.kind,
+        closed: Boolean(closed),
+        updatedAt: serverTimestamp()
+      });
+      return Boolean(closed);
+    }
+
+    function reservationPayload({ requestId, name, contact, concept, slotId, memo, status = "confirmed" }) {
+      return {
+        requestId: String(requestId || "").trim(),
+        name: String(name || "").trim() || t("anonymous"),
+        contact: String(contact || "").trim(),
+        concept: String(concept || ""),
+        slotId: String(slotId || ""),
+        slotText: slotId ? formatSlot(slotId) : "",
+        status: ["confirmed", "completed", "cancelled"].includes(status) ? status : "confirmed",
+        memo: String(memo || "").trim(),
+        source: "admin",
+        createdByUid: currentUser?.uid || "",
+        language: lang,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+    }
+
+    async function saveReservationRecord(details) {
+      if (!serviceReady || !recordStore || !isAdminUser()) return null;
+      return addDoc(reservationsCollection(), reservationPayload(details));
+    }
+
+    function recordSnapshotToReservation(docSnapshot) {
+      const data = docSnapshot.data();
+      return {
+        id: docSnapshot.id,
+        recordId: docSnapshot.id,
+        requestId: data.requestId || "",
+        name: data.name || t("anonymous"),
+        contact: data.contact || "",
+        concept: data.concept || "",
+        slotId: data.slotId || "",
+        slotText: data.slotText || "",
+        status: ["confirmed", "completed", "cancelled"].includes(data.status) ? data.status : "confirmed",
+        memo: data.memo || "",
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
+      };
+    }
+
+    function unsubscribeFromReservations() {
+      if (unsubscribeReservationRecords) {
+        unsubscribeReservationRecords();
+        unsubscribeReservationRecords = null;
+      }
+    }
+
+    function subscribeReservations() {
+      if (!serviceReady || !recordStore || unsubscribeReservationRecords) return;
+      const q = query(reservationsCollection(), orderBy("createdAt", "desc"));
+      unsubscribeReservationRecords = onSnapshot(q, snapshot => {
+        reservations = snapshot.docs.map(recordSnapshotToReservation);
+        saveState();
+        renderAll();
+      }, error => {
+        console.warn("Reservation subscription failed", error);
+        showToast(t("loadFailed"));
+      });
+    }
 
     function startOfToday() {
       const today = new Date();
@@ -2091,6 +2613,14 @@
       return next;
     }
 
+    function startOfMondayWeek(date) {
+      const start = new Date(date);
+      const weekday = start.getDay();
+      const offset = weekday === 0 ? -6 : 1 - weekday;
+      start.setDate(start.getDate() + offset);
+      return start;
+    }
+
     function toISODate(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -2098,19 +2628,41 @@
       return `${year}-${month}-${day}`;
     }
 
-    function makeSlots() {
-      const saved = storage.get("slots", null);
-      const base = startOfToday();
-      const todayIso = toISODate(base);
-      if (
-        saved &&
-        storage.get("slotDataVersion", 0) === SLOT_DATA_VERSION &&
-        [...new Set(saved.map(slot => slot.date))].sort()[0] === todayIso
-      ) {
-        return saved;
-      }
+    function isISODateString(value) {
+      return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+    }
+
+    function defaultCalendarSettings() {
+      const start = addDays(startOfToday(), 1);
+      return {
+        openStartDate: toISODate(start),
+        openEndDate: toISODate(addDays(start, DEFAULT_CALENDAR_OPEN_DAYS - 1))
+      };
+    }
+
+    function normalizeCalendarSettings(settings) {
+      const fallback = defaultCalendarSettings();
+      const openStartDate = isISODateString(settings?.openStartDate) ? settings.openStartDate : fallback.openStartDate;
+      const rawEndDate = isISODateString(settings?.openEndDate) ? settings.openEndDate : fallback.openEndDate;
+      return {
+        openStartDate,
+        openEndDate: rawEndDate >= openStartDate ? rawEndDate : openStartDate
+      };
+    }
+
+    function calendarDayCount(settings) {
+      const start = new Date(`${settings.openStartDate}T00:00:00`);
+      const end = new Date(`${settings.openEndDate}T00:00:00`);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return DEFAULT_CALENDAR_OPEN_DAYS;
+      return Math.min(120, Math.floor((end - start) / 86400000) + 1);
+    }
+
+    function makeSlots(settings, previousSlots = []) {
+      const normalized = normalizeCalendarSettings(settings);
+      const previousById = new Map(previousSlots.map(slot => [slot.id, slot]));
       const slots = [];
-      for (let d = 0; d < SLOT_HORIZON_DAYS; d += 1) {
+      const base = new Date(`${normalized.openStartDate}T00:00:00`);
+      for (let d = 0; d < calendarDayCount(normalized); d += 1) {
         const date = addDays(base, d);
         const iso = toISODate(date);
         const day = date.getDay();
@@ -2122,8 +2674,8 @@
             date: iso,
             time,
             kind: isWeekend ? "time" : "weekdayRequest",
-            requests: isWeekend ? (d + index) % 3 : 1 + ((d + index) % 2),
-            reserved: isWeekend ? index === 2 || index === 5 : false,
+            requests: previousById.get(`${iso}-${time}`)?.requests || 0,
+            reserved: false,
             capacity: 6
           });
         });
@@ -2133,7 +2685,10 @@
       return slots;
     }
 
-    let slots = makeSlots();
+    let calendarSettings = normalizeCalendarSettings(storage.get("calendarSettings", null));
+    let slotOverrides = storage.get("slotOverrides", {});
+    let slots = makeSlots(calendarSettings, storage.get("slots", []));
+    let reservations = storage.get("reservations", []);
     let orders = storage.get("orders", [
       {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + 1),
@@ -2160,6 +2715,9 @@
     function saveState() {
       storage.set("slots", slots);
       storage.set("orders", orders);
+      storage.set("calendarSettings", calendarSettings);
+      storage.set("slotOverrides", slotOverrides);
+      storage.set("reservations", reservations);
     }
 
     function t(key) {
@@ -2231,11 +2789,13 @@
 
     function formatOrderSlots(order, separator = " · ") {
       const labels = orderSlotIds(order).map(formatSlot).filter(label => label && label !== "—");
+      if (!labels.length && order?.slotSummary) return order.slotSummary.split("\n").filter(Boolean).join(separator);
       return labels.length ? labels.join(separator) : "—";
     }
 
     function renderOrderSlotLines(order) {
       const labels = orderSlotIds(order).map(formatSlot).filter(label => label && label !== "—");
+      if (!labels.length && order?.slotSummary) return order.slotSummary.split("\n").map(label => safeText(label)).join("<br>");
       return labels.length ? labels.map(label => safeText(label)).join("<br>") : "—";
     }
 
@@ -2245,6 +2805,41 @@
       selectedSlotIds = selectedSlotIds.includes(slotId)
         ? selectedSlotIds.filter(id => id !== slotId)
         : [...selectedSlotIds, slotId];
+    }
+
+    async function toggleAdminSlotClosed(slotId) {
+      if (!isAdminUser()) {
+        showToast(t("authRequired"));
+        return;
+      }
+      const slot = slots.find(item => item.id === slotId);
+      if (!slot) return;
+      const wasClosed = isAdminClosedSlot(slot);
+      const nextClosed = !wasClosed;
+      const previous = slotOverrides[slotId];
+      slotOverrides[slotId] = {
+        slotId,
+        date: slot.date,
+        time: String(slot.time || ""),
+        kind: slot.kind,
+        closed: nextClosed
+      };
+      saveState();
+      renderAll();
+      try {
+        await saveSlotOverrideRecord(slot, nextClosed);
+        showToast(t(nextClosed ? "slotClosedByAdmin" : "slotOpenedByAdmin"));
+      } catch (error) {
+        console.warn("Slot override save failed", error);
+        if (previous) {
+          slotOverrides[slotId] = previous;
+        } else {
+          delete slotOverrides[slotId];
+        }
+        saveState();
+        renderAll();
+        showToast(t("saveFailed"));
+      }
     }
 
     function hasInvalidSelectedSlot() {
@@ -2335,8 +2930,12 @@
       return !Number.isNaN(slotDate.getTime()) && slotDate.getTime() < Date.now();
     }
 
+    function isAdminClosedSlot(slot) {
+      return Boolean(slot && slotOverrides[slot.id]?.closed);
+    }
+
     function isSlotBlocked(slot) {
-      return Boolean(slot?.reserved) || isAutoClosedSlot(slot) || isPastWeekdayRequest(slot);
+      return Boolean(slot?.reserved) || isAdminClosedSlot(slot) || isAutoClosedSlot(slot) || isPastWeekdayRequest(slot);
     }
 
     function setLanguage(nextLang) {
@@ -2352,6 +2951,7 @@
         el.setAttribute("placeholder", t(key));
       });
       document.getElementById("languageSelect").value = lang;
+      updateAuthUi();
       renderAll();
     }
 
@@ -2365,11 +2965,45 @@
       if (current) select.value = current;
     }
 
-    function renderSlotOptions() {
-      const select = document.getElementById("adminSlot");
+    function slotOptionLabel(slot) {
+      const label = `${formatDate(slot.date)} · ${slotDisplayLabel(slot)}`;
+      return isSlotBlocked(slot) ? `${label} · ${t("adminClosedState")}` : label;
+    }
+
+    function renderSlotOptions(selectId = "adminSlot") {
+      const select = document.getElementById(selectId);
+      if (!select) return;
       const current = select.value;
-      select.innerHTML = slots.map(slot => `<option value="${escapeAttr(slot.id)}">${safeText(formatDate(slot.date))} · ${safeText(slotDisplayLabel(slot))}</option>`).join("");
+      select.innerHTML = slots.map(slot => `<option value="${escapeAttr(slot.id)}">${safeText(slotOptionLabel(slot))}</option>`).join("");
       if (current) select.value = current;
+    }
+
+    function renderReservationRequestOptions() {
+      const select = document.getElementById("reservationRequest");
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = `<option value="">${safeText(t("manualReservationOption"))}</option>` + orders.map(order => `
+        <option value="${escapeAttr(order.id)}">${safeText(order.name)} · ${safeText(orderLabel(order))} · ${safeText(formatOrderSlots(order))}</option>
+      `).join("");
+      if (current) select.value = current;
+    }
+
+    function renderReservationStatusOptions() {
+      const select = document.getElementById("reservationStatus");
+      if (!select) return;
+      const current = select.value || "confirmed";
+      select.innerHTML = ["confirmed", "completed", "cancelled"].map(status => `
+        <option value="${escapeAttr(status)}">${safeText(t(`reservationStatuses.${status}`))}</option>
+      `).join("");
+      select.value = current;
+    }
+
+    function renderCalendarWindowForm() {
+      const start = document.getElementById("calendarOpenStart");
+      const end = document.getElementById("calendarOpenEnd");
+      if (!start || !end) return;
+      if (document.activeElement !== start) start.value = calendarSettings.openStartDate;
+      if (document.activeElement !== end) end.value = calendarSettings.openEndDate;
     }
 
     function renderConceptCards() {
@@ -2400,19 +3034,32 @@
     }
 
     function futureCalendarWeeks() {
-      const base = startOfToday();
-      return Array.from({ length: FUTURE_WEEK_COUNT }, (_, weekIndex) => (
-        Array.from({ length: 7 }, (_, dayIndex) => toISODate(addDays(base, weekIndex * 7 + dayIndex)))
-      ));
+      const openStart = new Date(`${calendarSettings.openStartDate}T00:00:00`);
+      const openEnd = addDays(openStart, calendarDayCount(calendarSettings) - 1);
+      let weekStart = startOfMondayWeek(openStart);
+      const weeks = [];
+      while (weekStart <= openEnd) {
+        weeks.push(Array.from({ length: 7 }, (_, dayIndex) => {
+          const date = addDays(weekStart, dayIndex);
+          const iso = toISODate(date);
+          return {
+            iso,
+            inWindow: date >= openStart && date <= openEnd
+          };
+        }));
+        weekStart = addDays(weekStart, 7);
+      }
+      return weeks;
     }
 
-    function weekMonthLabels(weekDates) {
-      return [...new Set(weekDates.map(formatMonthLegend))];
+    function weekMonthLabels(weekDays) {
+      return [...new Set(weekDays.filter(day => day.inWindow).map(day => formatMonthLegend(day.iso)))];
     }
 
     function renderCalendar() {
       const grid = document.getElementById("calendarGrid");
       const weeks = futureCalendarWeeks();
+      const adminEditing = document.body.classList.contains("admin-on") && isAdminUser();
 
       grid.innerHTML = `
         <div class="month-calendar" aria-label="${escapeAttr(t("calendarTitle"))}">
@@ -2427,7 +3074,13 @@
                 `).join("")}
               </div>
             <div class="calendar-week-row">
-              ${weekDates.map(date => {
+              ${weekDates.map(day => {
+            const date = day.iso;
+            if (!day.inWindow) {
+              return `
+            <section class="calendar-day-column is-empty" aria-hidden="true"></section>
+          `;
+            }
             const daySlots = slots
               .filter(slot => slot.date === date)
               .sort((a, b) => String(a.time).localeCompare(String(b.time)));
@@ -2441,17 +3094,20 @@
               <div class="calendar-slot-list">
                 ${daySlots.map(slot => {
                   const isBlocked = isSlotBlocked(slot);
+                  const isAdminClosed = isAdminClosedSlot(slot);
                   const isSelected = selectedSlotIds.includes(slot.id);
+                  const isDisabled = isBlocked && !adminEditing;
                   return `
                     <button
-                      class="slot-btn ${isSelected ? "is-selected" : ""} ${isBlocked ? "is-blocked" : ""} ${slot.kind === "weekdayRequest" ? "is-request" : ""}"
+                      class="slot-btn ${isSelected ? "is-selected" : ""} ${isBlocked ? "is-blocked" : ""} ${isAdminClosed ? "is-admin-closed" : ""} ${adminEditing ? "is-admin-edit" : ""} ${slot.kind === "weekdayRequest" ? "is-request" : ""}"
                       type="button"
                       data-slot-id="${escapeAttr(slot.id)}"
-                      ${isBlocked ? "disabled" : ""}
-                      aria-pressed="${isSelected ? "true" : "false"}"
+                      ${isDisabled ? "disabled" : ""}
+                      aria-pressed="${adminEditing ? isAdminClosed : isSelected ? "true" : "false"}"
                       aria-label="${escapeAttr(`${formatDate(slot.date)} ${slotDisplayLabel(slot)}`)}"
                     >
                       <span class="slot-time">${safeText(slotDisplayLabel(slot))}</span>
+                      ${adminEditing ? `<span class="slot-admin-state">${safeText(t(isAdminClosed ? "adminClosedState" : "adminOpenState"))}</span>` : ""}
                     </button>
                   `;
                 }).join("")}
@@ -2468,7 +3124,12 @@
 
       grid.querySelectorAll("[data-slot-id]").forEach(button => {
         button.addEventListener("click", () => {
-          toggleSlotSelection(button.getAttribute("data-slot-id"));
+          const slotId = button.getAttribute("data-slot-id");
+          if (document.body.classList.contains("admin-on") && isAdminUser()) {
+            toggleAdminSlotClosed(slotId);
+            return;
+          }
+          toggleSlotSelection(slotId);
           renderCalendar();
           renderSelectedSlot();
         });
@@ -2506,16 +3167,20 @@
       return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     }
 
-    function addOrder({ name, contact, concept, slotId, slotIds, memo, status = "incoming" }) {
+    function addOrder({ id, recordId, name, contact, concept, slotId, slotIds, slotSummary, memo, status = "incoming" }) {
       const cleanName = String(name || "").trim() || t("anonymous");
       const cleanSlotIds = [...new Set((Array.isArray(slotIds) && slotIds.length ? slotIds : [slotId]).filter(Boolean))];
+      const orderId = String(id || recordId || newId());
+      orders = orders.filter(order => order.id !== orderId);
       orders.unshift({
-        id: newId(),
+        id: orderId,
+        recordId: String(recordId || id || ""),
         name: cleanName,
         contact: String(contact || "").trim(),
         concept,
         slotId: cleanSlotIds[0] || "",
         slotIds: cleanSlotIds,
+        slotSummary: String(slotSummary || orderSlotSummary(cleanSlotIds)),
         status,
         memo: String(memo || "").trim(),
         createdAt: new Date().toISOString()
@@ -2524,6 +3189,46 @@
         const slot = slots.find(item => item.id === id);
         if (slot) slot.requests += 1;
       });
+      saveState();
+      renderAll();
+    }
+
+    function addReservation({ id, recordId, requestId, name, contact, concept, slotId, slotText, memo, status = "confirmed" }) {
+      const reservationId = String(id || recordId || newId());
+      const cleanSlotId = String(slotId || "");
+      reservations = reservations.filter(reservation => reservation.id !== reservationId);
+      reservations.unshift({
+        id: reservationId,
+        recordId: String(recordId || id || ""),
+        requestId: String(requestId || ""),
+        name: String(name || "").trim() || t("anonymous"),
+        contact: String(contact || "").trim(),
+        concept: String(concept || ""),
+        slotId: cleanSlotId,
+        slotText: String(slotText || (cleanSlotId ? formatSlot(cleanSlotId) : "")),
+        status: ["confirmed", "completed", "cancelled"].includes(status) ? status : "confirmed",
+        memo: String(memo || "").trim(),
+        createdAt: new Date().toISOString()
+      });
+      if (cleanSlotId) {
+        const slot = slots.find(item => item.id === cleanSlotId);
+        if (slot) {
+          slotOverrides[cleanSlotId] = {
+            slotId: cleanSlotId,
+            date: slot.date,
+            time: String(slot.time || ""),
+            kind: slot.kind,
+            closed: true
+          };
+        }
+      }
+      if (requestId) {
+        const order = orders.find(item => item.id === requestId);
+        if (order) {
+          order.status = "shooting";
+          updateOrderRecordStatus(order);
+        }
+      }
       saveState();
       renderAll();
     }
@@ -2548,6 +3253,18 @@
       return concept && concept.title ? concept.title : order.concept;
     }
 
+    function shortId(id) {
+      return String(id || "").slice(0, 6) || "—";
+    }
+
+    function reservationForOrder(orderId) {
+      return reservations.find(reservation => reservation.requestId === orderId);
+    }
+
+    function reservationStatusLabel(status) {
+      return t(`reservationStatuses.${status}`) || status || "—";
+    }
+
     function renderRecentOrders() {
       const list = document.getElementById("recentOrdersList");
       if (!orders.length) {
@@ -2566,7 +3283,7 @@
     function renderOrdersTable() {
       const body = document.getElementById("ordersTableBody");
       if (!orders.length) {
-        body.innerHTML = `<tr><td colspan="5">${safeText(t("noOrders"))}</td></tr>`;
+        body.innerHTML = `<tr><td colspan="6">${safeText(t("noOrders"))}</td></tr>`;
         return;
       }
       body.innerHTML = orders.map(order => `
@@ -2576,8 +3293,46 @@
           <td>${safeText(formatOrderSlots(order))}</td>
           <td><span class="status-pill">${safeText(t(`statuses.${order.status}`))}</span></td>
           <td>${safeText(order.memo)}</td>
+          <td>${renderOrderReservationCell(order)}</td>
         </tr>
       `).join("");
+
+      body.querySelectorAll("[data-fill-reservation]").forEach(button => {
+        button.addEventListener("click", () => prefillReservationFromOrder(button.getAttribute("data-fill-reservation")));
+      });
+    }
+
+    function renderOrderReservationCell(order) {
+      const linked = reservationForOrder(order.id);
+      if (linked) {
+        const label = linked.slotText || formatSlot(linked.slotId);
+        return `<span class="linked-chip">${safeText(reservationStatusLabel(linked.status))} · ${safeText(label)}</span>`;
+      }
+      return `<button class="tiny-btn" type="button" data-fill-reservation="${escapeAttr(order.id)}">${safeText(t("fillReservation"))}</button>`;
+    }
+
+    function renderReservationsTable() {
+      const body = document.getElementById("reservationsTableBody");
+      if (!body) return;
+      if (!reservations.length) {
+        body.innerHTML = `<tr><td colspan="5">${safeText(t("noReservations"))}</td></tr>`;
+        return;
+      }
+      body.innerHTML = reservations.map(reservation => {
+        const request = orders.find(order => order.id === reservation.requestId);
+        const linkedText = request
+          ? `${t("reservationLinkedTo").replace("{id}", shortId(request.id))} · ${request.name}`
+          : t("reservationManual");
+        return `
+          <tr>
+            <td>${safeText(reservation.name)}</td>
+            <td>${safeText(linkedText)}</td>
+            <td>${safeText(reservation.slotText || formatSlot(reservation.slotId))}</td>
+            <td><span class="status-pill">${safeText(reservationStatusLabel(reservation.status))}</span></td>
+            <td>${safeText(reservation.memo)}</td>
+          </tr>
+        `;
+      }).join("");
     }
 
     function renderKanban() {
@@ -2610,6 +3365,7 @@
           const order = orders.find(item => item.id === draggedOrderId);
           if (!order) return;
           order.status = column.getAttribute("data-kanban-status");
+          updateOrderRecordStatus(order);
           saveState();
           renderAll();
           showToast(t("dropped"));
@@ -2648,16 +3404,42 @@
       const index = statusOrder.indexOf(order.status);
       const nextIndex = Math.max(0, Math.min(statusOrder.length - 1, index + step));
       order.status = statusOrder[nextIndex];
+      updateOrderRecordStatus(order);
       saveState();
       renderAll();
       showToast(t("moved"));
     }
 
     function deleteOrder(orderId) {
+      const order = orders.find(item => item.id === orderId);
+      deleteOrderRecord(order);
       orders = orders.filter(order => order.id !== orderId);
       saveState();
       renderAll();
       showToast(t("deleted"));
+    }
+
+    async function updateOrderRecordStatus(order) {
+      if (!serviceReady || !recordStore || !isAdminUser() || !order?.recordId) return;
+      try {
+        await updateDoc(orderRecordDoc(order.recordId), {
+          status: order.status,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.warn("Status update failed", error);
+        showToast(t("saveFailed"));
+      }
+    }
+
+    async function deleteOrderRecord(order) {
+      if (!serviceReady || !recordStore || !isAdminUser() || !order?.recordId) return;
+      try {
+        await deleteDoc(orderRecordDoc(order.recordId));
+      } catch (error) {
+        console.warn("Delete failed", error);
+        showToast(t("saveFailed"));
+      }
     }
 
     function renderMetrics() {
@@ -2694,12 +3476,18 @@
       renderConceptCards();
       renderConceptOptions("conceptSelect");
       renderConceptOptions("adminConcept");
+      renderConceptOptions("reservationConcept");
       renderSlotOptions();
+      renderSlotOptions("reservationSlot");
+      renderReservationRequestOptions();
+      renderReservationStatusOptions();
+      renderCalendarWindowForm();
       renderCalendar();
       renderSelectedSlot();
       renderCheckerTable();
       renderRecentOrders();
       renderOrdersTable();
+      renderReservationsTable();
       renderKanban();
       renderMetrics();
     }
@@ -2716,19 +3504,27 @@
       const adminSwitch = document.getElementById("adminSwitch");
       adminSwitch.checked = enabled;
       document.body.classList.toggle("admin-on", enabled);
+      renderCalendar();
+    }
+
+    function showAdminTab(tab) {
+      document.querySelectorAll(".admin-tab").forEach(item => item.classList.toggle("is-active", item.getAttribute("data-tab") === tab));
+      document.querySelectorAll(".admin-panel").forEach(panel => panel.classList.toggle("is-active", panel.id === `panel-${tab}`));
     }
 
     function openAdminLock() {
+      if (isAdminUser()) {
+        unlockAdmin();
+        return;
+      }
       const lock = document.getElementById("adminLock");
-      const password = document.getElementById("adminPassword");
       lock.classList.add("is-open");
-      password.value = "";
-      requestAnimationFrame(() => password.focus());
+      updateAuthUi();
+      requestAnimationFrame(() => document.getElementById("adminGoogleButton").focus());
     }
 
     function closeAdminLock() {
       document.getElementById("adminLock").classList.remove("is-open");
-      document.getElementById("adminPassword").value = "";
       setAdminMode(false);
     }
 
@@ -2737,6 +3533,35 @@
       setAdminMode(true);
       showToast(t("adminUnlocked"));
       document.getElementById("adminHub").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function requestAdminAccess() {
+      try {
+        await signInWithGoogle({ forceAccountSelect: true });
+      } catch (error) {
+        console.warn("Admin Google sign-in failed", error);
+        showToast(t("connectionUnavailable"));
+        return;
+      }
+      if (isAdminUser()) {
+        unlockAdmin();
+        return;
+      }
+      showToast(t("adminPasswordWrong"));
+    }
+
+    function prefillReservationFromOrder(orderId) {
+      const order = orders.find(item => item.id === orderId);
+      if (!order) return;
+      showAdminTab("reservations");
+      renderReservationRequestOptions();
+      document.getElementById("reservationRequest").value = order.id;
+      document.getElementById("reservationName").value = order.name || "";
+      document.getElementById("reservationContact").value = order.contact || "";
+      document.getElementById("reservationConcept").value = order.concept || "";
+      document.getElementById("reservationSlot").value = orderSlotIds(order)[0] || slots[0]?.id || "";
+      document.getElementById("reservationMemo").value = order.memo || "";
+      document.getElementById("reservationRecordForm").scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
     function bindEvents() {
@@ -2756,13 +3581,7 @@
 
       document.getElementById("adminLockForm").addEventListener("submit", event => {
         event.preventDefault();
-        if (document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
-          unlockAdmin();
-          return;
-        }
-        document.getElementById("adminPassword").value = "";
-        document.getElementById("adminPassword").focus();
-        showToast(t("adminPasswordWrong"));
+        requestAdminAccess();
       });
 
       document.getElementById("adminCancelButton").addEventListener("click", closeAdminLock);
@@ -2776,7 +3595,7 @@
         }
       });
 
-      document.getElementById("inquiryForm").addEventListener("submit", event => {
+      document.getElementById("inquiryForm").addEventListener("submit", async event => {
         event.preventDefault();
         if (!document.getElementById("customerName").value.trim()) {
           showToast(t("chooseSlotFirst"));
@@ -2798,9 +3617,18 @@
           slotIds: chosenSlotIds,
           memo: document.getElementById("customerMemo").value
         };
+        let recordId = "";
+        try {
+          const docRef = await saveOrderRecord(inquiryDetails, "public");
+          recordId = docRef?.id || "";
+          if (recordId) showToast(t("saveSucceeded"));
+        } catch (error) {
+          console.warn("Inquiry save failed", error);
+          showToast(t("saveFailed"));
+        }
         const copyPromise = copyTextToClipboard(composeInquiryMessage(inquiryDetails));
         selectedSlotIds = [];
-        addOrder(inquiryDetails);
+        addOrder({ ...inquiryDetails, id: recordId });
         event.target.reset();
         renderSelectedSlot();
         const kakaoWindow = window.open(KAKAO_CHANNEL_URL, "_blank");
@@ -2809,25 +3637,92 @@
         if (!kakaoWindow) window.location.href = KAKAO_CHANNEL_URL;
       });
 
-      document.getElementById("adminAddOrderForm").addEventListener("submit", event => {
+      document.getElementById("adminAddOrderForm").addEventListener("submit", async event => {
         event.preventDefault();
-        addOrder({
+        const orderDetails = {
           name: document.getElementById("adminName").value,
           contact: document.getElementById("adminContact").value,
           concept: document.getElementById("adminConcept").value,
-          slotId: document.getElementById("adminSlot").value,
+          slotIds: [document.getElementById("adminSlot").value].filter(Boolean),
           memo: document.getElementById("adminMemo").value
-        });
+        };
+        let recordId = "";
+        try {
+          if (!isAdminUser()) await signInWithGoogle({ forceAccountSelect: true });
+          if (!isAdminUser()) {
+            showToast(t("adminPasswordWrong"));
+            return;
+          }
+          const docRef = await saveOrderRecord(orderDetails, "admin");
+          recordId = docRef?.id || "";
+        } catch (error) {
+          console.warn("Admin order save failed", error);
+          showToast(t("saveFailed"));
+        }
+        addOrder({ ...orderDetails, id: recordId });
         event.target.reset();
         renderSlotOptions();
         showToast(t("orderAdded"));
       });
 
+      document.getElementById("calendarWindowForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        const openStartDate = document.getElementById("calendarOpenStart").value;
+        const openEndDate = document.getElementById("calendarOpenEnd").value;
+        if (openEndDate < openStartDate) {
+          showToast(t("calendarWindowInvalid"));
+          return;
+        }
+        const nextSettings = normalizeCalendarSettings({ openStartDate, openEndDate });
+        rebuildSlotsFromCalendarSettings(nextSettings);
+        try {
+          await saveCalendarSettingsRecord(nextSettings);
+          showToast(t("calendarWindowSaved"));
+        } catch (error) {
+          console.warn("Calendar settings save failed", error);
+          showToast(t("saveFailed"));
+        }
+      });
+
+      document.getElementById("reservationRequest").addEventListener("change", event => {
+        if (event.target.value) prefillReservationFromOrder(event.target.value);
+      });
+
+      document.getElementById("reservationRecordForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        const details = {
+          requestId: document.getElementById("reservationRequest").value,
+          name: document.getElementById("reservationName").value,
+          contact: document.getElementById("reservationContact").value,
+          concept: document.getElementById("reservationConcept").value,
+          slotId: document.getElementById("reservationSlot").value,
+          status: document.getElementById("reservationStatus").value,
+          memo: document.getElementById("reservationMemo").value
+        };
+        let recordId = "";
+        try {
+          if (!isAdminUser()) await signInWithGoogle({ forceAccountSelect: true });
+          if (!isAdminUser()) {
+            showToast(t("adminPasswordWrong"));
+            return;
+          }
+          const docRef = await saveReservationRecord(details);
+          recordId = docRef?.id || "";
+          const slot = slots.find(item => item.id === details.slotId);
+          if (slot) await saveSlotOverrideRecord(slot, true);
+        } catch (error) {
+          console.warn("Reservation save failed", error);
+          showToast(t("saveFailed"));
+        }
+        addReservation({ ...details, id: recordId });
+        event.target.reset();
+        renderAll();
+        showToast(t("reservationAdded"));
+      });
+
       document.querySelectorAll(".admin-tab").forEach(button => {
         button.addEventListener("click", () => {
-          const tab = button.getAttribute("data-tab");
-          document.querySelectorAll(".admin-tab").forEach(item => item.classList.toggle("is-active", item === button));
-          document.querySelectorAll(".admin-panel").forEach(panel => panel.classList.toggle("is-active", panel.id === `panel-${tab}`));
+          showAdminTab(button.getAttribute("data-tab"));
         });
       });
     }
@@ -2840,6 +3735,8 @@
     initVisits();
     bindEvents();
     setLanguage(lang);
+    initializeServices();
+    updateAuthUi();
   </script>
 </body>
 </html>

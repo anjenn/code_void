@@ -2,28 +2,29 @@
 
 ## Current Scope
 
-This repository currently contains a standalone HTML/CSS/JS site. It stores visits, language, slots, and orders in browser `localStorage`.
+This repository contains a standalone HTML/CSS/JS site backed by private request storage and an admin-only workspace. Browser `localStorage` is still used for non-sensitive UI state such as visits, language, and local fallback state.
 
-Important limitation: `localStorage` is not a secure database. Do not use the browser-only storage model as a production system for real customer bookings, private contact data, payments, or admin operations.
+Important limitation: browser storage is not secure private storage. Do not store sensitive secrets, tokens, payment data, passwords, private contracts, or admin-only data in browser storage.
 
 ## Browser-Only Safety Rules
 
 - Treat all form values and `localStorage` values as untrusted.
 - Escape user-controlled values before rendering them into HTML.
 - Do not add `eval`, dynamic script injection, remote scripts, or inline event handler attributes.
-- Keep buttons and forms client-only unless a real backend is intentionally added.
+- Keep client-only fallback state separate from customer records.
 - Do not store sensitive secrets, tokens, payment data, passwords, or private contracts in `localStorage`.
 - Keep external links explicit and review any new third-party domain before adding it.
 
 ## Production Requirements
 
-Before accepting real inquiries, replace the mock storage model with:
+Before broadly sharing the booking flow, verify:
 
-- Authenticated backend API.
-- Server-side database.
-- Server-side validation for every field.
-- Admin authentication and authorization.
-- CSRF protection for state-changing requests.
+- Google sign-in is enabled for 관리자 mode.
+- Private access rules are deployed for customer records.
+- Public visitors can create inquiry documents but cannot read, update, or delete them.
+- Public visitors can read only non-PII calendar availability documents: `settings/calendar` and `slotOverrides`.
+- Admin access is restricted to verified Google accounts with an approved admin marker.
+- Private rules validate every field.
 - Rate limiting and spam protection for public inquiry submissions.
 - Audit log for admin status changes and order edits.
 - Centralized error handling and monitoring.
@@ -45,11 +46,12 @@ Production data rules:
 - Delete unconfirmed inquiries after the stated retention period.
 - Limit admin access to people who need it.
 - Never expose customer contact data in public views.
+- Keep reservation records and linked request details admin-only because they contain customer contact data and booking context.
 - Avoid collecting government IDs, payment card numbers, health data, or unrelated sensitive details.
 
 ## Rendering And XSS
 
-Any value that can come from a form, URL, backend, CMS, or storage must be rendered as text unless there is a deliberate reviewed reason to allow markup.
+Any value that can come from a form, URL, admin tool, content tool, or storage must be rendered as text unless there is a deliberate reviewed reason to allow markup.
 
 Allowed:
 
@@ -66,10 +68,11 @@ Avoid:
 
 ## Admin Guardrail
 
-The current admin switch has a client-side demo password gate. This only hides the panel in the browser and is not real security because the password is visible in the page source. In production:
+The admin switch opens a Google sign-in gate. The page only reveals the admin workspace when a verified account has an approved admin marker; private rules must enforce the same marker check for admin reads, updates, and deletes.
 
-- Admin mode must require login.
-- Admin routes and APIs must enforce authorization on the server.
+- Admin mode must require Google sign-in.
+- Admin routes, reads, and writes must enforce authorization through private rules.
+- Calendar setting writes, slot close/open writes, and reservation record writes must remain admin-only.
 - Order status changes should record who changed what and when.
 - Deleting or exporting order data should require a deliberate confirmation step.
 - Admin analytics must not leak individual customer data.

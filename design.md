@@ -9,7 +9,7 @@ The primary user flows are:
 1. A visitor checks the creator profile and links.
 2. A visitor chooses a concept.
 3. A visitor picks a calendar slot and submits an inquiry.
-4. An admin opens the workspace, reviews demand, manages orders, and checks insights.
+4. An admin signs in with the allowed Google account, opens the workspace, reviews demand, manages orders, and checks insights.
 
 ## Visual System
 
@@ -61,15 +61,17 @@ Use the existing CSS custom properties in `index.html` as the source of truth:
 Required interactions:
 
 - Language switch updates all major visible text.
-- Admin switch opens a password prompt before revealing the admin workspace.
+- Admin switch opens a Google sign-in prompt and only reveals the admin workspace to the configured admin account.
 - Concept buttons preselect the inquiry concept and scroll to the calendar.
 - Slot click toggles that slot in a multi-select list, so visitors can send several possible dates/times for admin review.
-- Calendar starts from the current day by default and displays the upcoming future weeks without showing past dates.
-- Inquiry submit copies a paste-ready inquiry summary, opens Kakao Channel, increments every selected slot request count, and creates one incoming admin order with all selected candidate slots.
+- Calendar displays the admin-configured open window, defaulting to tomorrow through roughly one month ahead.
+- Inquiry submit saves a public inquiry, copies a paste-ready inquiry summary, opens Kakao Channel, increments every selected slot request count, and creates one incoming admin order with all selected candidate slots.
 - Public Kakao handoff should be possible once the visitor has entered a name; contact, concept, memo, and candidate slots enrich the request but should not block the button.
+- In admin mode, clicking a calendar slot toggles that slot between open and closed without changing public inquiry selections.
+- Admin can add reservation records and optionally link each record back to an incoming request.
 - Manual admin order add increments the selected slot and creates an order.
 - Kanban previous/next buttons and drag/drop update order status.
-- Insights update after inquiries or manual orders are added.
+- Insights update after inquiries, manual orders, or reservation records are added.
 
 ## Layout Rules
 
@@ -77,7 +79,7 @@ Required interactions:
 - Tablet: concept cards use two columns.
 - Mobile: all major sections become one column.
 - Top navigation stays sticky and usable on narrow screens.
-- Calendar availability should show compact future-week rows with inline month stoppers: Saturdays and Sundays show concrete time slots, Monday-Friday show a single request button, and reserved or within-one-hour weekend slots appear as disabled blocked chips.
+- Calendar availability should show compact open-window rows with inline month stoppers: Saturdays and Sundays show concrete time slots, Monday-Friday show a single request button, and closed or within-one-hour weekend slots appear as blocked chips.
 - Buttons must have stable dimensions and visible focus states.
 - Text must not overlap, clip awkwardly, or require horizontal scrolling.
 
