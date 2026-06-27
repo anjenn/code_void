@@ -1,5 +1,0 @@
-[[redirects]]
-  from = "/__/auth/*"
-  to = "https://arcross-1b910.firebaseapp.com/__/auth/:splat"
-  status = 200
-  force = true

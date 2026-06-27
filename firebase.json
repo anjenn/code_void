@@ -13,6 +13,8 @@
         "supportEmail": "anjenn9912@gmail.com",
         "authorizedRedirectUris": [
           "https://code-void.com/__/auth/handler",
+          "https://code-void.firebaseapp.com/__/auth/handler",
+          "https://code-void.web.app/__/auth/handler",
           "https://arcross-1b910.firebaseapp.com/__/auth/handler",
           "https://code-v01d.firebaseapp.com/__/auth/handler"
         ]
