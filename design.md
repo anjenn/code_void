@@ -2,7 +2,7 @@
 
 ## Product Intent
 
-Code V01D is a one-page bilingual booking and admin mockup for a pastel photo/concept studio. The first screen should feel like a branded booking experience, not a SaaS dashboard or a generic landing page.
+Code V01D is a one-page bilingual booking and admin site for a pastel photo/concept studio. The first screen should feel like a branded booking experience, not a SaaS dashboard or a generic landing page.
 
 The primary user flows are:
 
@@ -31,7 +31,7 @@ Avoid:
 
 ## Core Tokens
 
-Use the existing CSS custom properties in `code_void_one_page_mockup.html` as the source of truth:
+Use the existing CSS custom properties in `index.html` as the source of truth:
 
 ```css
 --paper: #fff9ff;
@@ -91,6 +91,6 @@ Required interactions:
 
 ## Asset Rules
 
-The current mockup uses CSS mood-board placeholders. In a production design pass, concept cards should use real studio/concept images or approved generated bitmap assets that clearly show the product or shoot style.
+Concept cards should use real studio/concept images or approved generated bitmap assets that clearly show the product or shoot style. Keep those card assets optimized for static hosting.
 
-Do not add external dependencies to the standalone mockup unless the project is intentionally converted into a real build system.
+Do not add external dependencies to the standalone static site unless the project is intentionally converted into a real build system.

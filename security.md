@@ -2,11 +2,11 @@
 
 ## Current Scope
 
-This repository currently contains a standalone HTML/CSS/JS mockup. It stores visits, language, slots, and orders in browser `localStorage`.
+This repository currently contains a standalone HTML/CSS/JS site. It stores visits, language, slots, and orders in browser `localStorage`.
 
-Important limitation: `localStorage` is not a secure database. Do not use this mockup as a production system for real customer bookings, private contact data, payments, or admin operations.
+Important limitation: `localStorage` is not a secure database. Do not use the browser-only storage model as a production system for real customer bookings, private contact data, payments, or admin operations.
 
-## Mockup Safety Rules
+## Browser-Only Safety Rules
 
 - Treat all form values and `localStorage` values as untrusted.
 - Escape user-controlled values before rendering them into HTML.

@@ -1,13 +1,13 @@
-# Code V01D Booking Mockup
+# Code V01D Booking Site
 
-Static one-page booking/admin mockup for Code V01D Studio.
+Static one-page booking/admin site for Code V01D Studio.
 
 ## Files
 
-- `index.html` redirects visitors to the current app page.
-- `code_void_one_page_mockup.html` contains the standalone HTML/CSS/JS app.
+- `index.html` contains the standalone HTML/CSS/JS app.
+- `code_void_one_page_mockup.html` redirects legacy local links to `index.html`.
 - `design.md` records design and interaction guardrails.
-- `security.md` records mockup security limitations and production requirements.
+- `security.md` records browser-only data limitations and production requirements.
 
 ## Deploy
 
@@ -22,9 +22,9 @@ python3 -m http.server 4173
 Then open:
 
 ```text
-http://127.0.0.1:4173/code_void_one_page_mockup.html
+http://127.0.0.1:4173/
 ```
 
 ## Important
 
-The current admin and inquiry storage are mock-only browser features. Real deployment for customer data requires the backend, authentication, and data protections listed in `security.md`.
+The current admin and inquiry storage are browser-only features. Real deployment for customer data requires the backend, authentication, and data protections listed in `security.md`.
