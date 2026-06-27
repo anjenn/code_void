@@ -25,6 +25,7 @@
       --radius-lg: 34px;
       --radius-md: 22px;
       --radius-sm: 14px;
+      --calendar-card-height: 188px;
       --serif: "Noto Serif KR", "Nanum Myeongjo", "Iropke Batang", "AppleMyungjo", Georgia, Cambria, "Times New Roman", serif;
       --sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
     }
@@ -721,6 +722,107 @@
       font-weight: 900;
     }
 
+    .mobile-calendar-tools {
+      display: none;
+    }
+
+    .mobile-calendar-search-wrap {
+      display: none;
+    }
+
+    .mobile-calendar-search {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(230, 149, 211, .42);
+      color: #8b518b;
+      background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,235,249,.68));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.44);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .mobile-mini-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .mobile-week-label {
+      display: none;
+      color: #8f4e9b;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .mobile-mini-day {
+      min-height: 42px;
+      display: grid;
+      place-items: center;
+      gap: 1px;
+      padding: 5px 3px;
+      border-radius: 12px;
+      border: 1px solid rgba(230, 149, 211, .30);
+      background: rgba(255,255,255,.58);
+      color: #8b518b;
+      font-family: var(--sans);
+      line-height: 1.05;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .mobile-mini-day strong {
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .mobile-mini-day span {
+      font-size: 9px;
+      font-weight: 900;
+      color: #a47aa7;
+    }
+
+    .mobile-mini-day:hover,
+    .mobile-mini-day.is-active {
+      transform: translateY(-1px);
+      border-color: rgba(216, 77, 149, .56);
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,229,247,.78));
+      box-shadow: 0 8px 18px rgba(171, 83, 181, .12);
+    }
+
+    .mobile-mini-day.is-selected {
+      border-color: rgba(128, 91, 207, .58);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.78), 0 8px 18px rgba(128, 91, 207, .14);
+    }
+
+    .mobile-mini-day.is-unavailable {
+      cursor: not-allowed;
+      color: rgba(104, 91, 112, .50);
+      border-color: rgba(151, 135, 158, .20);
+      background: rgba(235, 232, 238, .46);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .mobile-mini-day.is-unavailable span {
+      color: rgba(104, 91, 112, .48);
+    }
+
+    .mobile-calendar-more {
+      display: none;
+      width: 100%;
+      min-height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(230, 149, 211, .36);
+      background: rgba(255,255,255,.68);
+      color: #8b518b;
+      font-family: var(--sans);
+      font-weight: 900;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.42);
+    }
+
     .calendar-week-row {
       display: flex;
       align-items: stretch;
@@ -750,7 +852,7 @@
     .calendar-day-column {
       flex: 1 0 82px;
       min-width: 0;
-      max-height: 188px;
+      height: var(--calendar-card-height);
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
       border-radius: 16px;
@@ -765,6 +867,21 @@
       min-height: 112px;
     }
 
+    .calendar-day-column.is-unavailable {
+      border-color: rgba(151, 135, 158, .24);
+      background: rgba(235, 232, 238, .46);
+      box-shadow: none;
+    }
+
+    .calendar-day-column.is-unavailable .calendar-day-head {
+      background: linear-gradient(135deg, rgba(224,219,229,.78), rgba(244,242,246,.72));
+    }
+
+    .calendar-day-column.is-unavailable .calendar-day-head strong,
+    .calendar-day-column.is-unavailable .calendar-day-head span {
+      color: rgba(104, 91, 112, .62);
+    }
+
     .calendar-day-column.is-weekday {
       display: grid;
       grid-template-rows: auto 1fr;
@@ -772,7 +889,7 @@
 
     .calendar-day-column.is-weekday-range {
       flex: 5 0 250px;
-      max-height: 128px;
+      height: var(--calendar-card-height);
     }
 
     .calendar-day-column.is-weekday-range .calendar-day-head strong {
@@ -781,11 +898,12 @@
 
     .calendar-day-column.is-weekday-range .calendar-slot-list {
       max-height: none;
-      align-content: stretch;
+      align-content: start;
     }
 
     .calendar-day-column.is-weekday-range .slot-btn {
-      min-height: 56px;
+      min-height: 27px;
+      height: auto;
     }
 
     .slot-btn.is-range .slot-time {
@@ -914,6 +1032,7 @@
     }
 
     .slot-btn.is-blocked,
+    .slot-btn.is-unavailable,
     .slot-btn:disabled {
       cursor: not-allowed;
       color: rgba(118, 83, 126, .45);
@@ -924,6 +1043,10 @@
       box-shadow: none;
       transform: none;
       text-decoration: line-through;
+    }
+
+    .slot-btn.is-unavailable {
+      text-decoration: none;
     }
 
     .slot-btn.is-admin-edit {
@@ -1226,6 +1349,17 @@
     .slot-table td:last-child,
     .order-table td:last-child { border-right: 1px solid rgba(225, 148, 207, .20); border-radius: 0 16px 16px 0; }
 
+    .slot-table tr.is-group-start td {
+      border-top-color: rgba(216, 77, 149, .42);
+      box-shadow: inset 0 2px 0 rgba(216, 77, 149, .12);
+    }
+
+    .slot-table td.date-group {
+      vertical-align: top;
+      font-weight: 900;
+      color: #8f4e9b;
+    }
+
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -1399,12 +1533,20 @@
       margin-top: 26px;
       padding: 18px 20px;
       border-radius: 999px;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       border: 1px solid rgba(255,255,255,.72);
       background: rgba(255,255,255,.52);
       color: #9675a0;
       font-family: var(--sans);
       font-size: 13px;
+    }
+
+    .footer-credit {
+      flex: 1 1 auto;
+      text-align: center;
     }
 
     .toast {
@@ -1537,16 +1679,41 @@
       .section-title, .admin-title { display: block; }
       .section-title h2, .admin-title h2 { font-size: 30px; }
       .concept-grid, .dashboard-grid, .notice-grid, .field-row { grid-template-columns: 1fr; }
-      .calendar-week-row { flex-wrap: wrap; overflow-x: visible; padding-bottom: 0; }
-      .calendar-day-column { flex: 1 1 calc(50% - 6px); min-width: 126px; max-height: 176px; }
-      .calendar-day-column.is-weekday-range { flex-basis: 100%; max-height: 132px; }
-      .calendar-day-head { min-height: 48px; padding: 8px 6px; }
-      .calendar-slot-list { max-height: 122px; }
+      .mobile-calendar-search-wrap { display: block; margin: 0 0 12px; }
+      .mobile-calendar-tools { display: grid; gap: 8px; margin: 0 0 10px; }
+      .mobile-week-label { display: block; }
+      .month-calendar:not(.is-mobile-expanded):not(.is-searching) .calendar-week-block.is-mobile-extra { display: none; }
+      .mobile-calendar-more { display: block; margin-top: 10px; }
+      .month-calendar.is-mobile-expanded .mobile-calendar-more,
+      .month-calendar.is-searching .mobile-calendar-more { display: none; }
+      .calendar-week-row { display: block; overflow: visible; padding-bottom: 0; }
+      .calendar-week-row .calendar-day-column { display: none; }
+      .calendar-week-row .calendar-day-column.is-mobile-active {
+        display: grid;
+        min-width: 0;
+        height: auto;
+        min-height: var(--calendar-card-height);
+        max-height: none;
+      }
+      .calendar-day-column.is-weekday-range { height: auto; max-height: none; }
+      .calendar-day-head { min-height: 50px; padding: 9px 8px; }
+      .calendar-slot-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: none;
+        overflow: visible;
+        padding: 8px;
+      }
+      .calendar-day-column.is-weekday-range .calendar-slot-list { grid-template-columns: 1fr; }
+      .slot-btn { min-height: 42px; }
+      .slot-btn.is-request { min-height: 48px; }
+      .calendar-day-column.is-weekday-range .slot-btn.is-request { min-height: 42px; }
       .concept-card { min-height: 210px; border-radius: 22px; }
       .concept-card h3 { font-size: 18px; }
       .slot-panel { padding: 18px; }
       .slot-panel h3, .mini-panel h3, .notice-card h3 { font-size: 21px; }
       .notice-fold summary { width: 100%; justify-content: center; }
+      .footer-note { border-radius: 24px; flex-direction: column; }
+      .footer-credit { width: 100%; }
       .bar-row { grid-template-columns: 1fr; }
       .slot-table, .order-table { font-size: 13px; }
       .slot-table th:nth-child(3), .slot-table td:nth-child(3), .order-table th:nth-child(5), .order-table td:nth-child(5) { display: none; }
@@ -1554,7 +1721,7 @@
 
     @media (max-width: 390px) {
       .nav a { flex-basis: calc(50% - 6px); }
-      .calendar-day-column { flex-basis: 100%; }
+      .calendar-slot-list { grid-template-columns: 1fr; }
       .link-cloud a { flex-basis: 100%; }
       h1 { font-size: 40px; }
     }
@@ -1581,11 +1748,6 @@
           <option value="ko">한국어</option>
           <option value="en">English</option>
         </select>
-        <label class="admin-toggle" title="Admin mode switch">
-          <input id="adminSwitch" type="checkbox">
-          <span class="switch-dot" aria-hidden="true"></span>
-          <span data-i18n="adminMode">관리자</span>
-        </label>
       </div>
     </header>
 
@@ -1857,7 +2019,14 @@
       </section>
     </main>
 
-    <footer class="footer-note" data-i18n="footerNote">© Code V01D Studio</footer>
+    <footer class="footer-note">
+      <span class="footer-credit" data-i18n="footerNote">© Code V01D Studio</span>
+      <label class="admin-toggle" title="Admin mode switch">
+        <input id="adminSwitch" type="checkbox">
+        <span class="switch-dot" aria-hidden="true"></span>
+        <span data-i18n="adminMode">관리자</span>
+      </label>
+    </footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1902,7 +2071,10 @@
     const CONCEPT_GUIDE_URL = "https://blog.naver.com/code_v01d/224328857251";
     const SLOT_DATA_VERSION = 11;
     const DEFAULT_CALENDAR_OPEN_DAYS = 30;
+    const MOBILE_INITIAL_WEEK_COUNT = 3;
     const SLOT_CLOSE_WINDOW_MS = 60 * 60 * 1000;
+    const KOREA_UTC_OFFSET_MS = 9 * 60 * 60 * 1000;
+    const CALENDAR_ROLLOVER_HOUR_KST = 12;
     const appConfig = {
       apiKey: "AIzaSyDsYlsmaK_eyh-FskxAF_hlY0-wdUMlmaw",
       authDomain: "arcross-1b910." + "fire" + "baseapp.com",
@@ -2021,6 +2193,8 @@
         tableTime: "시간",
         tableStatus: "상태",
         closedStatus: "마감",
+        pastDate: "지난 날짜",
+        unavailableDate: "예약 불가",
         recentOrdersTitle: "최근 인입",
         noOrders: "아직 인입 주문이 없습니다.",
         ordersTitle: "인입 주문 섹션",
@@ -2206,6 +2380,8 @@
         tableTime: "Time",
         tableStatus: "Status",
         closedStatus: "Closed",
+        pastDate: "Past date",
+        unavailableDate: "Unavailable",
         recentOrdersTitle: "Recent incoming",
         noOrders: "No incoming orders yet.",
         ordersTitle: "Incoming orders section",
@@ -2321,6 +2497,9 @@
     let recordStore = null;
     let currentUser = null;
     let currentAdminUid = "";
+    let mobileCalendarSelectionByWeek = {};
+    let mobileCalendarSearch = "";
+    let mobileCalendarExpanded = false;
     let authStateCheckId = 0;
     let unsubscribeOrderRecords = null;
     let unsubscribeCalendarSettings = null;
@@ -2376,6 +2555,9 @@
             currentAdminUid = hasAccess ? user.uid : "";
             updateAuthUi();
             if (user === currentUser && isAdminUser(user)) {
+              saveCalendarSettingsRecord(calendarSettings).catch(error => {
+                console.warn("Calendar rollover sync failed", error);
+              });
               subscribeOrderRecords();
               subscribeReservations();
             } else {
@@ -2547,6 +2729,35 @@
       saveState();
       subscribeSlotOverrides();
       renderAll();
+      persistRolledCalendarSettings(nextSettings);
+    }
+
+    function persistRolledCalendarSettings(sourceSettings) {
+      const source = normalizeCalendarSettings({
+        openStartDate: sourceSettings?.openStartDate,
+        openEndDate: sourceSettings?.openEndDate
+      });
+      const changed = source.openStartDate !== sourceSettings?.openStartDate || source.openEndDate !== sourceSettings?.openEndDate;
+      if (!changed || !isAdminUser()) return;
+      saveCalendarSettingsRecord(source).catch(error => {
+        console.warn("Calendar rollover save failed", error);
+      });
+    }
+
+    function applyCalendarRollover() {
+      const previousSettings = calendarSettings;
+      const nextSettings = normalizeCalendarSettings(calendarSettings);
+      if (
+        nextSettings.openStartDate === previousSettings.openStartDate &&
+        nextSettings.openEndDate === previousSettings.openEndDate
+      ) return;
+
+      rebuildSlotsFromCalendarSettings(nextSettings);
+      if (isAdminUser()) {
+        saveCalendarSettingsRecord(nextSettings).catch(error => {
+          console.warn("Calendar rollover save failed", error);
+        });
+      }
     }
 
     function subscribeCalendarSettings() {
@@ -2709,6 +2920,29 @@
       return next;
     }
 
+    function isoDateFromUtcMs(utcMs) {
+      return new Date(utcMs).toISOString().slice(0, 10);
+    }
+
+    function currentKoreaServiceDate(now = new Date()) {
+      const koreaNowMs = now.getTime() + KOREA_UTC_OFFSET_MS;
+      const koreaDate = new Date(koreaNowMs);
+      const rolloverPassed = koreaDate.getUTCHours() >= CALENDAR_ROLLOVER_HOUR_KST;
+      const serviceDateMs = Date.UTC(
+        koreaDate.getUTCFullYear(),
+        koreaDate.getUTCMonth(),
+        koreaDate.getUTCDate() + (rolloverPassed ? 1 : 0)
+      );
+      return isoDateFromUtcMs(serviceDateMs);
+    }
+
+    function daysBetweenISO(startIso, endIso) {
+      const start = new Date(`${startIso}T00:00:00`);
+      const end = new Date(`${endIso}T00:00:00`);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+      return Math.floor((end - start) / 86400000);
+    }
+
     function startOfMondayWeek(date) {
       const start = new Date(date);
       const weekday = start.getDay();
@@ -2740,9 +2974,23 @@
       const fallback = defaultCalendarSettings();
       const openStartDate = isISODateString(settings?.openStartDate) ? settings.openStartDate : fallback.openStartDate;
       const rawEndDate = isISODateString(settings?.openEndDate) ? settings.openEndDate : fallback.openEndDate;
-      return {
+      const normalized = {
         openStartDate,
         openEndDate: rawEndDate >= openStartDate ? rawEndDate : openStartDate
+      };
+      return rollCalendarSettingsForward(normalized);
+    }
+
+    function rollCalendarSettingsForward(settings, now = new Date()) {
+      const serviceDate = currentKoreaServiceDate(now);
+      if (!settings?.openStartDate || settings.openStartDate >= serviceDate) return settings;
+
+      const dayShift = daysBetweenISO(settings.openStartDate, serviceDate);
+      if (dayShift <= 0) return settings;
+
+      return {
+        openStartDate: serviceDate,
+        openEndDate: toISODate(addDays(new Date(`${settings.openEndDate}T00:00:00`), dayShift))
       };
     }
 
@@ -3273,26 +3521,199 @@
     }
 
     function visibleWeekCells(weekDates) {
-      const weekdayRangeSlots = [];
+      const weekdayCells = [];
+      let weekdayRun = null;
       const weekendDays = [];
-      weekDates.filter(day => day.inWindow).forEach(day => {
+
+      const flushWeekdayRun = () => {
+        if (!weekdayRun) return;
+        weekdayCells.push(weekdayRun);
+        weekdayRun = null;
+      };
+
+      weekDates.forEach(day => {
         const date = new Date(`${day.iso}T00:00:00`);
         const weekday = date.getDay();
         if (weekday >= 1 && weekday <= 5) {
           const requestSlot = slotsForDate(day.iso).find(slot => slot.kind === "weekdayRequest");
-          if (requestSlot) weekdayRangeSlots.push(requestSlot);
+          const isAvailable = Boolean(day.inWindow && requestSlot);
+          const type = isAvailable ? "weekdayRange" : "unavailableRange";
+          if (!weekdayRun || weekdayRun.type !== type) flushWeekdayRun();
+          if (!weekdayRun) weekdayRun = isAvailable
+            ? { type, slots: [] }
+            : { type, days: [] };
+          if (isAvailable) {
+            weekdayRun.slots.push(requestSlot);
+          } else {
+            weekdayRun.days.push(day);
+          }
           return;
         }
-        weekendDays.push(day);
+        flushWeekdayRun();
+        weekendDays.push(day.inWindow ? { type: "day", day } : { type: "unavailableDay", day });
       });
+      flushWeekdayRun();
 
       return [
-        ...(weekdayRangeSlots.length ? [{ type: "weekdayRange", slots: weekdayRangeSlots }] : []),
-        ...weekendDays.map(day => ({ type: "day", day }))
+        ...weekdayCells,
+        ...weekendDays
       ];
     }
 
-    function renderWeekdayRangeCell(rangeSlots, adminEditing) {
+    function weekKey(weekDates) {
+      const dates = weekDates.filter(day => day.inWindow).map(day => day.iso);
+      return dates.length ? `${dates[0]}_${dates[dates.length - 1]}` : "";
+    }
+
+    function mobileWeekLabel(weekDates) {
+      const firstDay = weekDates.find(day => day.inWindow) || weekDates[0];
+      const date = new Date(`${firstDay.iso}T00:00:00`);
+      const month = new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", { month: "long" }).format(date);
+      const weekNumber = Math.floor((date.getDate() - 1) / 7) + 1;
+      return lang === "ko" ? `${month} ${weekNumber}주차` : `${month} week ${weekNumber}`;
+    }
+
+    function calendarCellKey(cell) {
+      if (cell.type === "weekdayRange") return `weekday_${cell.slots.map(slot => slot.date).join("_")}`;
+      if (cell.type === "unavailableRange") return `unavailable_${cell.days.map(day => day.iso).join("_")}`;
+      return `${cell.type}_${cell.day.iso}`;
+    }
+
+    function isUnavailableCell(cell) {
+      return cell.type === "unavailableRange" || cell.type === "unavailableDay";
+    }
+
+    function unavailableStatusForDate(iso) {
+      return isoDateTime(iso) < isoDateTime(calendarSettings.openStartDate)
+        ? t("pastDate")
+        : t("unavailableDate");
+    }
+
+    function unavailableCellDateRange(cell) {
+      if (cell.type === "unavailableRange") {
+        return formatDateRangeShort(cell.days[0].iso, cell.days[cell.days.length - 1].iso);
+      }
+      return formatDate(cell.day.iso);
+    }
+
+    function calendarCellLabel(cell) {
+      if (cell.type === "weekdayRange") return formatWeekdayRangeLabel(cell.slots);
+      if (cell.type === "unavailableRange") {
+        return `${unavailableCellDateRange(cell)} · ${unavailableStatusForDate(cell.days[0].iso)}`;
+      }
+      if (cell.type === "unavailableDay") {
+        return `${formatDate(cell.day.iso)} · ${unavailableStatusForDate(cell.day.iso)}`;
+      }
+      return `${formatDate(cell.day.iso)} · ${formatWeekday(cell.day.iso)}`;
+    }
+
+    function cellSearchText(cell) {
+      const dates = cell.type === "weekdayRange"
+        ? cell.slots.map(slot => slot.date)
+        : cell.type === "unavailableRange"
+          ? cell.days.map(day => day.iso)
+          : [cell.day.iso];
+      return [
+        calendarCellLabel(cell),
+        ...dates,
+        ...dates.map(formatDate),
+        ...dates.map(formatWeekday),
+        cell.type === "day" ? slotsForDate(cell.day.iso).map(slotDisplayLabel).join(" ") : ""
+      ].join(" ").toLowerCase();
+    }
+
+    function cellMatchesMobileSearch(cell) {
+      const query = mobileCalendarSearch.trim().toLowerCase();
+      return !query || cellSearchText(cell).includes(query);
+    }
+
+    function miniCellNumber(cell) {
+      if (cell.type === "weekdayRange") return `${new Date(`${cell.slots[0].date}T00:00:00`).getDate()}-${new Date(`${cell.slots[cell.slots.length - 1].date}T00:00:00`).getDate()}`;
+      if (cell.type === "unavailableRange") return `${new Date(`${cell.days[0].iso}T00:00:00`).getDate()}-${new Date(`${cell.days[cell.days.length - 1].iso}T00:00:00`).getDate()}`;
+      return new Date(`${cell.day.iso}T00:00:00`).getDate();
+    }
+
+    function miniCellWeekday(cell) {
+      if (cell.type === "weekdayRange") return cell.slots.length === 1 ? formatWeekday(cell.slots[0].date) : `${formatWeekday(cell.slots[0].date)}-${formatWeekday(cell.slots[cell.slots.length - 1].date)}`;
+      if (cell.type === "unavailableRange") return cell.days.length === 1 ? formatWeekday(cell.days[0].iso) : `${formatWeekday(cell.days[0].iso)}-${formatWeekday(cell.days[cell.days.length - 1].iso)}`;
+      return formatWeekday(cell.day.iso);
+    }
+
+    function cellHasSelectedSlot(cell) {
+      if (cell.type === "weekdayRange") return cell.slots.some(slot => selectedSlotIds.includes(slot.id));
+      if (cell.type === "day") return slotsForDate(cell.day.iso).some(slot => selectedSlotIds.includes(slot.id));
+      return false;
+    }
+
+    function renderMobileCalendarTools(weekId, cells, selectedKey, weekLabel) {
+      if (!weekId) return "";
+      return `
+        <div class="mobile-calendar-tools">
+          <span class="mobile-week-label">${safeText(weekLabel)}</span>
+          <div class="mobile-mini-calendar" aria-label="${escapeAttr(t("calendarTitle"))}">
+            ${cells.map(cell => {
+              const key = calendarCellKey(cell);
+              const unavailable = isUnavailableCell(cell);
+              const hidden = !cellMatchesMobileSearch(cell);
+              return `
+                <button
+                  class="mobile-mini-day ${key === selectedKey ? "is-active" : ""} ${unavailable ? "is-unavailable" : ""} ${cellHasSelectedSlot(cell) ? "is-selected" : ""}"
+                  type="button"
+                  data-mobile-week="${escapeAttr(weekId)}"
+                  data-mobile-cell-choice="${escapeAttr(key)}"
+                  data-mobile-search-text="${escapeAttr(cellSearchText(cell))}"
+                  ${unavailable ? "disabled" : ""}
+                  ${hidden ? "hidden" : ""}
+                  aria-pressed="${key === selectedKey ? "true" : "false"}"
+                  aria-label="${escapeAttr(calendarCellLabel(cell))}"
+                >
+                  <strong>${safeText(miniCellNumber(cell))}</strong>
+                  <span>${safeText(miniCellWeekday(cell))}</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUnavailableRangeCell(days, mobileKey = "", isMobileActive = false) {
+      const dateLabel = formatDateRangeShort(days[0].iso, days[days.length - 1].iso);
+      const weekdayLabel = days.length === 1
+        ? formatWeekday(days[0].iso)
+        : `${formatWeekday(days[0].iso)}-${formatWeekday(days[days.length - 1].iso)}`;
+      return `
+        <section class="calendar-day-column is-weekday is-weekday-range is-unavailable ${isMobileActive ? "is-mobile-active" : ""}" data-mobile-cell="${escapeAttr(mobileKey)}">
+          <div class="calendar-day-head">
+            <strong>${safeText(dateLabel)}</strong>
+            <span>${safeText(weekdayLabel)}</span>
+          </div>
+          <div class="calendar-slot-list">
+            <button class="slot-btn is-unavailable" type="button" disabled>
+              <span class="slot-time">${safeText(unavailableStatusForDate(days[0].iso))}</span>
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderUnavailableDayCell(day, mobileKey = "", isMobileActive = false) {
+      return `
+        <section class="calendar-day-column is-unavailable ${isMobileActive ? "is-mobile-active" : ""}" data-mobile-cell="${escapeAttr(mobileKey)}">
+          <div class="calendar-day-head">
+            <strong>${safeText(new Date(`${day.iso}T00:00:00`).getDate())}</strong>
+            <span>${safeText(formatWeekday(day.iso))}</span>
+          </div>
+          <div class="calendar-slot-list">
+            <button class="slot-btn is-unavailable" type="button" disabled>
+              <span class="slot-time">${safeText(unavailableStatusForDate(day.iso))}</span>
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderWeekdayRangeCell(rangeSlots, adminEditing, mobileKey = "", isMobileActive = false) {
       const rangeSlotIds = rangeSlots.map(slot => slot.id);
       const availableIds = rangeSlots.filter(slot => !isSlotBlocked(slot)).map(slot => slot.id);
       const isSelected = Boolean(availableIds.length) && availableIds.every(slotId => selectedSlotIds.includes(slotId));
@@ -3308,7 +3729,7 @@
         : t("adminOpenState");
 
       return `
-        <section class="calendar-day-column is-weekday is-weekday-range">
+        <section class="calendar-day-column is-weekday is-weekday-range ${isMobileActive ? "is-mobile-active" : ""}" data-mobile-cell="${escapeAttr(mobileKey)}">
           <div class="calendar-day-head">
             <strong>${safeText(formatDateRangeShort(rangeSlots[0].date, rangeSlots[rangeSlots.length - 1].date))}</strong>
             <span>${safeText(weekdayLabel)}</span>
@@ -3330,11 +3751,11 @@
       `;
     }
 
-    function renderCalendarDayCell(day, adminEditing) {
+    function renderCalendarDayCell(day, adminEditing, mobileKey = "", isMobileActive = false) {
       const date = day.iso;
       const daySlots = slotsForDate(date);
       return `
-        <section class="calendar-day-column">
+        <section class="calendar-day-column ${isMobileActive ? "is-mobile-active" : ""}" data-mobile-cell="${escapeAttr(mobileKey)}">
           <div class="calendar-day-head">
             <strong>${safeText(new Date(`${date}T00:00:00`).getDate())}</strong>
             <span>${safeText(formatWeekday(date))}</span>
@@ -3370,29 +3791,75 @@
       const adminEditing = document.body.classList.contains("admin-on") && isAdminUser();
 
       grid.innerHTML = `
-        <div class="month-calendar" aria-label="${escapeAttr(t("calendarTitle"))}">
-          ${weeks.map(weekDates => {
+        <div class="month-calendar ${mobileCalendarExpanded ? "is-mobile-expanded" : ""} ${mobileCalendarSearch.trim() ? "is-searching" : ""}" aria-label="${escapeAttr(t("calendarTitle"))}">
+          <div class="mobile-calendar-search-wrap">
+            <label class="sr-only">${safeText(t("calendarTitle"))}</label>
+            <input
+              class="mobile-calendar-search"
+              type="search"
+              value="${escapeAttr(mobileCalendarSearch)}"
+              placeholder="${escapeAttr(lang === "ko" ? "날짜, 요일, 시간 검색" : "Search date, day, or time")}"
+              autocomplete="off"
+              data-mobile-calendar-search
+            >
+          </div>
+          ${weeks.map((weekDates, weekIndex) => {
             const monthLabels = weekMonthLabels(weekDates);
+            const cells = visibleWeekCells(weekDates);
+            if (!cells.length) return "";
+            const currentWeekKey = weekKey(weekDates);
+            const selectableCells = cells.filter(cell => !isUnavailableCell(cell));
+            const fallbackMobileKey = calendarCellKey(selectableCells[0] || cells[0]);
+            const selectedMobileKey = selectableCells.some(cell => calendarCellKey(cell) === mobileCalendarSelectionByWeek[currentWeekKey])
+              ? mobileCalendarSelectionByWeek[currentWeekKey]
+              : fallbackMobileKey;
             return `
-            <div class="calendar-week-block">
+            <div class="calendar-week-block ${weekIndex >= MOBILE_INITIAL_WEEK_COUNT ? "is-mobile-extra" : ""}">
               <div class="calendar-week-heading">
                 ${monthLabels.map((label, index) => `
                   ${index ? `<span class="calendar-month-separator" aria-hidden="true">/</span>` : ""}
                   <span class="calendar-month-chip">${safeText(label)}</span>
                 `).join("")}
               </div>
+            ${renderMobileCalendarTools(currentWeekKey, cells, selectedMobileKey, mobileWeekLabel(weekDates))}
             <div class="calendar-week-row">
-              ${visibleWeekCells(weekDates).map(cell => (
-                cell.type === "weekdayRange"
-                  ? renderWeekdayRangeCell(cell.slots, adminEditing)
-                  : renderCalendarDayCell(cell.day, adminEditing)
-              )).join("")}
+              ${cells.map(cell => {
+                const cellKey = calendarCellKey(cell);
+                if (cell.type === "weekdayRange") return renderWeekdayRangeCell(cell.slots, adminEditing, cellKey, cellKey === selectedMobileKey);
+                if (cell.type === "unavailableRange") return renderUnavailableRangeCell(cell.days, cellKey, cellKey === selectedMobileKey);
+                if (cell.type === "unavailableDay") return renderUnavailableDayCell(cell.day, cellKey, cellKey === selectedMobileKey);
+                return renderCalendarDayCell(cell.day, adminEditing, cellKey, cellKey === selectedMobileKey);
+              }).join("")}
             </div>
             </div>
-          `;
+          `; 
           }).join("")}
+          <button class="mobile-calendar-more" type="button" data-mobile-calendar-more>
+            ${safeText(lang === "ko" ? "더 보기" : "Show more")}
+          </button>
         </div>
       `;
+
+      grid.querySelectorAll("[data-mobile-calendar-search]").forEach(input => {
+        input.addEventListener("input", () => {
+          mobileCalendarSearch = input.value;
+          applyMobileCalendarSearch(grid);
+        });
+      });
+
+      grid.querySelectorAll("[data-mobile-cell-choice]").forEach(button => {
+        button.addEventListener("click", () => {
+          mobileCalendarSelectionByWeek[button.getAttribute("data-mobile-week")] = button.getAttribute("data-mobile-cell-choice");
+          renderCalendar();
+        });
+      });
+
+      grid.querySelectorAll("[data-mobile-calendar-more]").forEach(button => {
+        button.addEventListener("click", () => {
+          mobileCalendarExpanded = true;
+          renderCalendar();
+        });
+      });
 
       grid.querySelectorAll("[data-slot-id]").forEach(button => {
         button.addEventListener("click", () => {
@@ -3420,6 +3887,19 @@
         });
       });
 
+    }
+
+    function applyMobileCalendarSearch(scope = document) {
+      const query = mobileCalendarSearch.trim().toLowerCase();
+      scope.querySelectorAll(".month-calendar").forEach(calendar => {
+        calendar.classList.toggle("is-searching", Boolean(query));
+      });
+      scope.querySelectorAll("[data-mobile-calendar-search]").forEach(input => {
+        if (input.value !== mobileCalendarSearch) input.value = mobileCalendarSearch;
+      });
+      scope.querySelectorAll("[data-mobile-search-text]").forEach(button => {
+        button.hidden = Boolean(query) && !button.getAttribute("data-mobile-search-text").includes(query);
+      });
     }
 
     function renderSelectedSlot() {
@@ -3517,20 +3997,62 @@
       renderAll();
     }
 
-    function renderCheckerTable() {
-      const body = document.getElementById("slotTableBody");
-      body.innerHTML = slots.map(slot => {
-        const isBlocked = isSlotBlocked(slot);
-        return `
-          <tr>
-            <td>${safeText(formatDate(slot.date))}</td>
-            <td>${safeText(slotDisplayLabel(slot))}</td>
-            <td>${isBlocked ? `<span class="status-pill">${safeText(t("closedStatus"))}</span>` : "—"}</td>
-          </tr>
-        `;
-      }).join("");
+    function compactCheckerRows() {
+      const rows = [];
+
+      futureCalendarWeeks().forEach(weekDates => {
+        visibleWeekCells(weekDates).forEach(cell => {
+          if (isUnavailableCell(cell)) return;
+          if (cell.type === "weekdayRange") {
+            const rangeSlots = cell.slots;
+            const closedCount = rangeSlots.filter(isSlotBlocked).length;
+            rows.push({
+              group: rangeSlots.map(slot => slot.date).join("_"),
+              date: formatDateRangeShort(rangeSlots[0].date, rangeSlots[rangeSlots.length - 1].date),
+              time: slotDisplayLabel(rangeSlots[0]),
+              closed: closedCount === rangeSlots.length,
+              status: closedCount ? `${closedCount}/${rangeSlots.length} ${t("closedStatus")}` : "—"
+            });
+            return;
+          }
+
+          slotsForDate(cell.day.iso).forEach(slot => {
+            const isBlocked = isSlotBlocked(slot);
+            rows.push({
+              group: slot.date,
+              date: formatDate(slot.date),
+              time: slotDisplayLabel(slot),
+              closed: isBlocked,
+              status: isBlocked ? t("closedStatus") : "—"
+            });
+          });
+        });
+      });
+
+      return rows;
     }
 
+    function renderCheckerTable() {
+      const body = document.getElementById("slotTableBody");
+      const rows = compactCheckerRows();
+      const groupCounts = rows.reduce((acc, row) => {
+        acc[row.group] = (acc[row.group] || 0) + 1;
+        return acc;
+      }, {});
+      const renderedGroups = new Set();
+
+      body.innerHTML = rows.map(row => {
+        const startsGroup = !renderedGroups.has(row.group);
+        if (startsGroup) renderedGroups.add(row.group);
+        return `
+        <tr class="${startsGroup ? "is-group-start" : ""}">
+          ${startsGroup ? `<td class="date-group" rowspan="${groupCounts[row.group]}">${safeText(row.date)}</td>` : ""}
+          <td>${safeText(row.time)}</td>
+          <td>${row.closed ? `<span class="status-pill">${safeText(row.status)}</span>` : safeText(row.status)}</td>
+        </tr>
+      `;
+      }).join("");
+    }
     function orderLabel(order) {
       if (!order?.concept) return "—";
       const concept = t(`concepts.${order.concept}`);
@@ -4062,9 +4584,15 @@
       });
     }
 
+    function startCalendarRolloverTimer() {
+      applyCalendarRollover();
+      setInterval(applyCalendarRollover, 60 * 1000);
+    }
+
     initVisits();
     bindEvents();
     setLanguage(lang);
+    startCalendarRolloverTimer();
     queueNonCriticalWork();
     updateAuthUi();
   </script>
