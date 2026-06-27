@@ -66,6 +66,7 @@ Required interactions:
 - Slot click toggles that slot in a multi-select list, so visitors can send several possible dates/times for admin review.
 - Calendar starts from the current day by default and displays the upcoming future weeks without showing past dates.
 - Inquiry submit copies a paste-ready inquiry summary, opens Kakao Channel, increments every selected slot request count, and creates one incoming admin order with all selected candidate slots.
+- Public Kakao handoff should be possible once the visitor has entered a name; contact, concept, memo, and candidate slots enrich the request but should not block the button.
 - Manual admin order add increments the selected slot and creates an order.
 - Kanban previous/next buttons and drag/drop update order status.
 - Insights update after inquiries or manual orders are added.
