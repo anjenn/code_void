@@ -3730,23 +3730,149 @@
       .code-concepts, .code-notices { padding: 14px; border-radius: 18px; }
       .code-concepts-title { margin-bottom: 12px; }
       .code-concepts-title h3 { font-size: 26px; }
-      .nest-class-calendar { padding: 10px; overflow: visible; }
+      .calendar-shell,
+      .nest-booking-shell {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .calendar-grid,
+      .nest-class-board {
+        width: 100%;
+        min-width: 0;
+        padding-bottom: 0;
+      }
+      .month-calendar,
+      .nest-class-calendar {
+        width: 100%;
+        min-width: 0;
+        padding: 10px;
+        border-radius: 16px;
+        gap: 12px;
+        overflow: visible;
+      }
+      .calendar-week-block {
+        min-width: 0;
+        gap: 8px;
+      }
+      .calendar-week-heading {
+        min-height: 34px;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+      }
+      .calendar-week-heading::after {
+        min-width: 72px;
+      }
+      .calendar-month-chip {
+        min-height: 30px;
+        padding: 6px 10px;
+      }
+      .mobile-calendar-tools {
+        display: none;
+      }
+      .calendar-week-row,
       .nest-week-row {
         display: grid;
         grid-template-columns: 1fr;
         min-width: 0;
         gap: 10px;
+        overflow: visible;
+        padding-bottom: 0;
       }
+      .calendar-week-row .calendar-day-column,
       .nest-week-row .calendar-day-column {
         display: grid;
+        width: 100%;
         height: auto;
         min-height: 0;
         max-height: none;
       }
+      .calendar-week-row .calendar-day-column.is-mobile-active {
+        min-height: 0;
+      }
+      .calendar-day-column {
+        border-radius: 12px;
+        box-shadow: 4px 4px 0 rgba(20,95,45,.13);
+      }
+      .calendar-day-column.is-weekday-range {
+        height: auto;
+        max-height: none;
+      }
+      .calendar-day-head {
+        min-height: 48px;
+        padding: 9px 10px;
+      }
+      .calendar-day-head strong {
+        font-size: 18px;
+      }
+      .calendar-day-head span {
+        font-size: 12px;
+      }
+      .calendar-slot-list,
       .nest-week-row .calendar-slot-list {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         max-height: none;
         overflow: visible;
+        gap: 7px;
+        padding: 8px;
+      }
+      .calendar-day-column.is-weekday-range .calendar-slot-list,
+      .calendar-day-column.is-unavailable .calendar-slot-list,
+      .nest-week-row .calendar-slot-list {
+        grid-template-columns: 1fr;
+      }
+      .calendar-week-row:not(.nest-week-row) .calendar-day-column:not(.is-weekday-range):not(.is-unavailable) .calendar-slot-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: none;
+        align-content: start;
+        max-height: none;
+      }
+      .slot-btn,
+      .calendar-week-row:not(.nest-week-row) .calendar-day-column:not(.is-weekday-range):not(.is-unavailable) .slot-btn {
+        min-height: 42px;
+        height: auto;
+        padding: 8px 5px;
+        line-height: 1.1;
+      }
+      .slot-btn.is-request,
+      .calendar-day-column.is-weekday-range .slot-btn.is-request {
+        min-height: 48px;
+      }
+      .slot-time,
+      .calendar-week-row:not(.nest-week-row) .calendar-day-column:not(.is-weekday-range):not(.is-unavailable) .slot-time {
+        line-height: 1.1;
+      }
+      .slot-panel {
+        position: relative;
+        top: auto;
+        width: 100%;
+        padding: 16px;
+        border-radius: 16px;
+      }
+      .selected-summary {
+        padding: 12px;
+        border-radius: 14px;
+        margin: 10px 0;
+      }
+      .selected-slot-list {
+        max-height: none;
+      }
+      .field-row,
+      .inquiry-actions {
+        grid-template-columns: 1fr;
+      }
+      .field {
+        min-height: 46px;
+        border-radius: 12px;
+      }
+      textarea.field {
+        min-height: 112px;
+      }
+      .inquiry-actions .primary-btn,
+      .inquiry-actions .ghost-btn {
+        min-height: 48px;
+        font-size: 13px;
       }
       .nest-slot-btn { min-height: 70px; }
       .concept-card { min-height: 220px; }
