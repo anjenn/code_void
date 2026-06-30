@@ -1,9 +1,62 @@
+# Secrets and local environment
 .env
 .env.*
 !.env.example
+*.local
+*.key
+*.pem
+
+# Local agent/tooling installs
+.agents/
+.codex/
+.claude/
+.cursor/
+.mcp/
+skills-lock.json
+
+# Dependencies, build outputs, and caches
 node_modules/
 dist/
-firebase-debug.log
+build/
+_site/
+.cache/
+.parcel-cache/
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# Firebase local output and logs
 .firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/editor files
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+*.swp
+*.swo
+
+# Raw or temporary asset sources.
+# Keep deployed public files under assets/ tracked when index.html references them.
+assets/raw/
+assets/tmp/
+assets/temp/
+assets/uploads/
+assets/**/*.psd
+assets/**/*.psb
+assets/**/*.ai
+assets/**/*.sketch
+assets/**/*.fig
+assets/**/*.xd
