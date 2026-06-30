@@ -3099,7 +3099,9 @@
     }
 
     .nest-booking-shell {
+      grid-template-columns: minmax(0, 1fr);
       align-items: start;
+      gap: 18px;
     }
 
     .nest-class-board {
@@ -3108,9 +3110,16 @@
 
     .nest-class-calendar {
       padding: 16px;
-      overflow-x: auto;
+      overflow: visible;
       scrollbar-color: #18763d rgba(255,255,243,.46);
       scrollbar-width: thin;
+    }
+
+    .nest-booking-shell .slot-panel {
+      position: relative;
+      top: auto;
+      width: 100%;
+      max-width: none;
     }
 
     .nest-class-admin-panel {
@@ -3172,9 +3181,9 @@
 
     .nest-week-row {
       display: grid;
-      grid-template-columns: repeat(7, minmax(126px, 1fr));
-      min-width: 930px;
-      gap: 8px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      min-width: 0;
+      gap: 6px;
       overflow: visible;
       padding-bottom: 0;
     }
@@ -3189,8 +3198,8 @@
       max-height: none;
       overflow: visible;
       align-content: start;
-      gap: 7px;
-      padding: 8px;
+      gap: 6px;
+      padding: 6px;
     }
 
     .nest-slot-btn {
