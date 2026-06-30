@@ -1429,6 +1429,48 @@ body.admin-on .admin-hub { display: block; }
   line-height: 1;
 }
 
+.visit-histogram-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 10px;
+}
+
+.visit-histogram {
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.visit-bar {
+  min-width: 0;
+  height: 92px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 6px;
+}
+
+.visit-bar i {
+  width: 100%;
+  display: block;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(180deg, #d84d95, #8d6bea);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.48), 0 7px 14px rgba(171,83,181,.14);
+}
+
+.visit-bar small {
+  display: block;
+  color: #9b7aa5;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
 .admin-split {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
@@ -3592,6 +3634,16 @@ body.admin-on .nest-slot-card:focus-within .nest-slot-admin-actions {
 .metric-card strong {
   color: #18763d;
   font-family: var(--display);
+}
+
+.visit-bar i {
+  background: linear-gradient(180deg, var(--gold), #18763d);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.46), 0 7px 0 rgba(20,95,45,.10);
+}
+
+.visit-bar small {
+  color: #3d5f35;
+  font-family: var(--code-accent);
 }
 
 .kanban-card,

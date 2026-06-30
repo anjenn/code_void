@@ -2850,20 +2850,61 @@ async function deleteOrderRecord(order) {
   }
 }
 
+function visitHistogramData(totalVisits = 0) {
+  const history = storage.get("visitHistory", {});
+  const today = new Date(`${currentKoreaServiceDate()}T00:00:00`);
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const iso = toISODate(addDays(today, index - 6));
+    return {
+      iso,
+      label: formatWeekday(iso),
+      count: safeNumber(history?.[iso])
+    };
+  });
+  if (!days.some(day => day.count) && totalVisits) {
+    days[days.length - 1].count = totalVisits;
+  }
+  return days;
+}
+
+function renderVisitHistogramCard(visits) {
+  const days = visitHistogramData(visits);
+  const max = Math.max(1, ...days.map(day => day.count));
+  return `
+    <article class="metric-card visit-histogram-card">
+      <span>${safeText(t("visits"))}</span>
+      <strong>${safeText(visits)}</strong>
+      <div class="visit-histogram" aria-label="${escapeAttr(t("visits"))}">
+        ${days.map(day => {
+          const height = day.count ? Math.max(14, Math.round((day.count / max) * 100)) : 5;
+          return `
+            <div class="visit-bar" aria-label="${escapeAttr(`${formatDate(day.iso)} ${day.count}`)}">
+              <i style="height: ${height}%;"></i>
+              <small>${safeText(day.label)}</small>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderMetrics() {
   const visits = storage.get("visits", 1);
   const inquiries = orders.length;
   const openOrders = orders.filter(order => order.status !== "done").length;
   const conversion = visits ? Math.round((inquiries / visits) * 100) : 0;
   const metrics = [
-    [t("visits"), visits],
     [t("inquiries"), inquiries],
     [t("openOrders"), openOrders],
     [t("conversion"), `${conversion}%`]
   ];
-  document.getElementById("metricGrid").innerHTML = metrics.map(([label, value]) => `
-    <article class="metric-card"><span>${safeText(label)}</span><strong>${safeText(value)}</strong></article>
-  `).join("");
+  document.getElementById("metricGrid").innerHTML = [
+    renderVisitHistogramCard(visits),
+    ...metrics.map(([label, value]) => `
+      <article class="metric-card"><span>${safeText(label)}</span><strong>${safeText(value)}</strong></article>
+    `)
+  ].join("");
 
   const counts = conceptMeta.map(({ id }) => ({
     id,
@@ -3259,6 +3300,18 @@ function bindEvents() {
 function initVisits() {
   const visits = storage.get("visits", 0) + 1;
   storage.set("visits", visits);
+  const today = currentKoreaServiceDate();
+  const rawHistory = storage.get("visitHistory", {});
+  const history = rawHistory && typeof rawHistory === "object" && !Array.isArray(rawHistory) ? rawHistory : {};
+  if (!Object.keys(history).length && visits > 1) {
+    history[today] = visits;
+  } else {
+    history[today] = safeNumber(history[today]) + 1;
+  }
+  const cutoff = toISODate(addDays(new Date(`${today}T00:00:00`), -30));
+  storage.set("visitHistory", Object.fromEntries(
+    Object.entries(history).filter(([iso]) => iso >= cutoff)
+  ));
 }
 
 function scheduleAfterFirstPaint(callback) {
