@@ -2078,10 +2078,10 @@
 
     .hero::before {
       display: block;
-      inset: 18px;
+      inset: 0;
       z-index: 0;
-      border: 1px solid rgba(166,207,58,.36);
-      border-radius: 26px;
+      border: 0;
+      border-radius: inherit;
       background:
         linear-gradient(rgba(150,255,120,.11) 1px, transparent 1px),
         linear-gradient(90deg, rgba(150,255,120,.11) 1px, transparent 1px),
@@ -2122,17 +2122,13 @@
     .plaque {
       position: relative;
       isolation: isolate;
-      overflow: hidden;
+      overflow: visible;
       min-height: 820px;
       padding: 54px 48px 56px;
       border: 0;
       border-radius: 0;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(50,120,56,.27), transparent 28%),
-        radial-gradient(circle at 86% 8%, rgba(198,255,48,.13), transparent 24%),
-        radial-gradient(circle at 20% 100%, rgba(21,230,83,.12), transparent 31%),
-        linear-gradient(135deg, #04120d 0%, #06140f 42%, #092316 100%);
-      box-shadow: 0 30px 120px rgba(0,0,0,.52);
+      background: transparent;
+      box-shadow: none;
       color: #fff9e7;
       font-family: var(--hero-korean);
       text-align: left;
@@ -2147,16 +2143,7 @@
     }
 
     .plaque::before {
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(150,255,120,.12) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(150,255,120,.12) 1px, transparent 1px),
-        linear-gradient(rgba(248,255,96,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(248,255,96,.045) 1px, transparent 1px),
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,.16) 0 1px, transparent 1.3px),
-        radial-gradient(circle at 80% 40%, rgba(255,255,255,.12) 0 1px, transparent 1.3px);
-      background-size: 28px 28px, 28px 28px, 112px 112px, 112px 112px;
-      opacity: .9;
+      display: none;
     }
 
     .plaque::after {
@@ -3548,7 +3535,7 @@
 
     @media (max-width: 650px) {
       .hero { padding: 12px; border-radius: 28px; }
-      .hero::before { inset: 10px; border-radius: 20px; }
+      .hero::before { inset: 0; border-radius: inherit; }
       .hero-grid { gap: 20px; }
       .plaque {
         min-height: 0;
