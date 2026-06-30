@@ -3113,6 +3113,53 @@
       scrollbar-width: thin;
     }
 
+    .nest-class-admin-panel {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 2px solid rgba(20,95,45,.46);
+      border-radius: 16px;
+      background: rgba(7,20,11,.88);
+      color: #fffef3;
+      box-shadow: 4px 4px 0 rgba(20,95,45,.18);
+    }
+
+    .nest-class-admin-panel strong {
+      display: block;
+      color: var(--gold);
+      font-family: var(--display);
+      font-size: 18px;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .nest-class-admin-panel span {
+      color: rgba(255,254,243,.74);
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .nest-class-admin-form {
+      display: grid;
+      grid-template-columns: minmax(110px, .75fr) minmax(112px, .7fr) minmax(150px, 1fr) minmax(150px, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nest-class-admin-form .field {
+      min-height: 42px;
+      border-color: rgba(239,240,90,.38);
+      background: rgba(255,255,243,.94);
+    }
+
+    .nest-class-admin-form .primary-btn,
+    .nest-class-admin-form .ghost-btn {
+      min-height: 42px;
+      white-space: nowrap;
+    }
+
     .nest-class-calendar::-webkit-scrollbar { height: 8px; }
     .nest-class-calendar::-webkit-scrollbar-track {
       border-radius: 999px;
@@ -3147,11 +3194,92 @@
     }
 
     .nest-slot-btn {
+      position: relative;
       min-height: 78px;
       place-items: stretch;
       align-content: center;
       gap: 4px;
       padding: 9px 8px;
+    }
+
+    .nest-slot-card {
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .nest-slot-main {
+      width: 100%;
+      min-height: 78px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 4px;
+      padding: 18px 8px 9px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      text-align: center;
+      font: inherit;
+    }
+
+    .nest-slot-main:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: -5px;
+    }
+
+    .nest-slot-admin-actions {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      z-index: 3;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity .16s ease, transform .16s ease;
+    }
+
+    body.admin-on .nest-slot-card:hover .nest-slot-admin-actions,
+    body.admin-on .nest-slot-card:focus-within .nest-slot-admin-actions {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nest-slot-admin-btn {
+      min-width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 7px;
+      border: 1px solid rgba(13,44,26,.44);
+      border-radius: 999px;
+      background: #fffef3;
+      color: #0d2c1a;
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 1000;
+      line-height: 1;
+      box-shadow: 1px 1px 0 rgba(13,44,26,.16);
+    }
+
+    .nest-slot-admin-btn:hover {
+      background: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    .nest-slot-admin-btn.is-delete {
+      padding: 0;
+      color: #fffef3;
+      background: #145f2d;
+    }
+
+    .nest-slot-admin-btn.is-delete:hover {
+      background: #0d2c1a;
+      color: var(--gold);
     }
 
     .nest-slot-btn .slot-time {
@@ -3778,6 +3906,17 @@
         gap: 12px;
         overflow: visible;
       }
+      .nest-class-admin-panel {
+        border-radius: 14px;
+        padding: 10px;
+      }
+      .nest-class-admin-form {
+        grid-template-columns: 1fr;
+      }
+      .nest-class-admin-form .primary-btn,
+      .nest-class-admin-form .ghost-btn {
+        width: 100%;
+      }
       .calendar-week-block {
         min-width: 0;
         gap: 8px;
@@ -3866,6 +4005,15 @@
       .slot-btn.is-request,
       .calendar-day-column.is-weekday-range .slot-btn.is-request {
         min-height: 48px;
+      }
+      body.admin-on .nest-slot-admin-actions {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+      }
+      .nest-slot-main {
+        min-height: 70px;
+        padding-top: 22px;
       }
       .slot-time,
       .calendar-week-row:not(.nest-week-row) .calendar-day-column:not(.is-weekday-range):not(.is-unavailable) .slot-time {
@@ -4378,6 +4526,23 @@
         nestSelectedSlotCount: "{count}개 클래스 선택됨",
         nestMemoPlaceholder: "예: 수강 희망 클래스, 경험 여부, 문의 내용",
         nestAutoSaveNote: "SMS 문의는 이름, 연락처, 클래스, 메모를 모두 입력하면 활성화됩니다. 카카오 채널 버튼은 문의 내용을 복사한 뒤 채널을 엽니다.",
+        nestClassAdminTitle: "네스트 댄스 일정 관리",
+        nestClassAdminHelper: "요일, 시작 시간, 클래스명, 강사명을 입력해 수업을 추가하거나 수정합니다.",
+        nestClassAdminDay: "요일",
+        nestClassAdminStart: "시작 시간",
+        nestClassAdminName: "클래스명",
+        nestClassAdminInstructor: "강사명",
+        nestClassAdminAdd: "수업 추가",
+        nestClassAdminUpdate: "변경 저장",
+        nestClassAdminCancel: "취소",
+        nestClassEdit: "수정",
+        nestClassDelete: "삭제",
+        nestClassAdded: "수업이 추가되었습니다.",
+        nestClassUpdated: "수업이 수정되었습니다.",
+        nestClassDeleted: "수업이 삭제되었습니다.",
+        nestClassFormInvalid: "요일, 시작 시간, 클래스명을 입력해 주세요.",
+        nestClassDeleteConfirm: "이 수업을 삭제할까요?",
+        nestClassLocalOnly: "브라우저에는 저장되었습니다. Firebase 규칙 배포 후 전체 방문자에게 동기화됩니다.",
         weekdayRequest: "문의하기",
         selectedSlotTitle: "선택한 슬롯",
         selectedSlotHelper: "가능한 모든 시간대를 선택해 주세요.",
@@ -4602,6 +4767,23 @@
         nestSelectedSlotCount: "{count} classes selected",
         nestMemoPlaceholder: "Ex: desired class, experience level, inquiry details",
         nestAutoSaveNote: "SMS inquiry is enabled when name, contact, class, and memo are all filled in. The Kakao Channel button copies the inquiry content, then opens the channel.",
+        nestClassAdminTitle: "Nest Dance Schedule Manager",
+        nestClassAdminHelper: "Add or edit a class with day, start time, class name, and instructor.",
+        nestClassAdminDay: "Day",
+        nestClassAdminStart: "Start time",
+        nestClassAdminName: "Class name",
+        nestClassAdminInstructor: "Instructor",
+        nestClassAdminAdd: "Add class",
+        nestClassAdminUpdate: "Save changes",
+        nestClassAdminCancel: "Cancel",
+        nestClassEdit: "Edit",
+        nestClassDelete: "Delete",
+        nestClassAdded: "Class added.",
+        nestClassUpdated: "Class updated.",
+        nestClassDeleted: "Class deleted.",
+        nestClassFormInvalid: "Please enter day, start time, and class name.",
+        nestClassDeleteConfirm: "Delete this class?",
+        nestClassLocalOnly: "Saved in this browser. It will sync for visitors after Firebase rules are deployed.",
         weekdayRequest: "Inquire",
         selectedSlotTitle: "Selected slots",
         selectedSlotHelper: "Please select all possible time slots.",
@@ -4809,7 +4991,7 @@
       { id: "sun", ko: "일", en: "SUN", koLong: "일요일", enLong: "Sunday" }
     ];
 
-    const nestClassSlots = [
+    const defaultNestClassSlots = [
       { id: "nest-mon-1800-kpop", day: "mon", time: "18:00", end: "19:00", title: "K-pop", teacher: "" },
       { id: "nest-mon-1900-choreo-minseo", day: "mon", time: "19:00", end: "20:00", title: "Choreo Basic", teacher: "Minseo" },
       { id: "nest-mon-2000-kpop-yerin", day: "mon", time: "20:00", end: "21:00", title: "K-pop Dance", teacher: "Yerin" },
@@ -4834,6 +5016,7 @@
     let lang = storage.get("lang", "ko");
     let selectedSlotIds = [];
     let selectedNestSlotIds = [];
+    let editingNestSlotId = "";
     let draggedOrderId = null;
     let serviceReady = false;
     let appInstance = null;
@@ -4849,6 +5032,10 @@
     let unsubscribeCalendarSettings = null;
     let unsubscribeSlotOverrides = [];
     let unsubscribeReservationRecords = null;
+    let unsubscribeNestClassSlots = null;
+    let remoteNestClassesLoaded = false;
+    let remoteNestClassesEmpty = false;
+    let nestClassSeedPromise = null;
     let renderAllQueued = false;
 
     async function loadRemoteSdk() {
@@ -4889,6 +5076,7 @@
           serviceReady = true;
           subscribeCalendarSettings();
           subscribeSlotOverrides();
+          subscribeNestClassSlots();
           onAuthStateChanged(authClient, async user => {
             const checkId = ++authStateCheckId;
             currentUser = user;
@@ -4904,6 +5092,7 @@
               });
               subscribeOrderRecords();
               subscribeReservations();
+              ensureRemoteNestClassSeed();
             } else {
               unsubscribeFromOrderRecords();
               unsubscribeFromReservations();
@@ -4993,6 +5182,142 @@
 
     function reservationsCollection() {
       return collection(recordStore, "reservations");
+    }
+
+    function nestClassSlotsCollection() {
+      return collection(recordStore, "nestClasses");
+    }
+
+    function nestClassSlotDoc(slotId) {
+      return doc(recordStore, "nestClasses", slotId);
+    }
+
+    function isValidNestDay(dayId) {
+      return nestWeekDays.some(day => day.id === dayId);
+    }
+
+    function normalizeClassTime(value) {
+      const raw = String(value || "").trim();
+      const match = raw.match(/^([01]?\d|2[0-3])(?::?([0-5]\d))?$/);
+      if (!match) return "";
+      return `${String(Number(match[1])).padStart(2, "0")}:${match[2] || "00"}`;
+    }
+
+    function addOneHourToClassTime(time) {
+      const normalized = normalizeClassTime(time);
+      if (!normalized) return "";
+      const [hours, minutes] = normalized.split(":").map(Number);
+      return `${String((hours + 1) % 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+
+    function compareNestClassSlots(a, b) {
+      const dayOrder = nestWeekDays.findIndex(day => day.id === a.day) - nestWeekDays.findIndex(day => day.id === b.day);
+      return dayOrder || String(a.time).localeCompare(String(b.time)) || String(a.title).localeCompare(String(b.title));
+    }
+
+    function nestClassSortKey(slot) {
+      const dayIndex = nestWeekDays.findIndex(day => day.id === slot.day);
+      return `${String(Math.max(0, dayIndex)).padStart(2, "0")}-${slot.time}-${slot.title}`;
+    }
+
+    function newNestClassSlotId(day, time) {
+      return `nest-${day}-${String(time || "").replace(/[^0-9]/g, "")}-${newId().slice(0, 8)}`;
+    }
+
+    function normalizeNestClassSlot(slot = {}, fallbackId = "") {
+      const day = isValidNestDay(slot.day) ? slot.day : "mon";
+      const time = normalizeClassTime(slot.time);
+      const title = String(slot.title || "").trim().slice(0, 80);
+      if (!time || !title) return null;
+      const end = normalizeClassTime(slot.end) || addOneHourToClassTime(time);
+      const teacher = String(slot.teacher || "").trim().slice(0, 80);
+      const id = String(slot.id || fallbackId || newNestClassSlotId(day, time)).trim().slice(0, 96);
+      const normalized = { id, day, time, end, title, teacher };
+      return { ...normalized, sortKey: nestClassSortKey(normalized) };
+    }
+
+    function normalizeNestClassSlots(slotList = []) {
+      const slotsById = new Map();
+      (Array.isArray(slotList) ? slotList : []).forEach((slot, index) => {
+        const normalized = normalizeNestClassSlot(slot, `nest-class-${index}`);
+        if (normalized) slotsById.set(normalized.id, normalized);
+      });
+      return [...slotsById.values()].sort(compareNestClassSlots);
+    }
+
+    function nestClassSlotPayload(slot) {
+      const normalized = normalizeNestClassSlot(slot);
+      return {
+        day: normalized.day,
+        time: normalized.time,
+        end: normalized.end,
+        title: normalized.title,
+        teacher: normalized.teacher,
+        sortKey: normalized.sortKey,
+        updatedAt: serverTimestamp()
+      };
+    }
+
+    function recordSnapshotToNestClassSlot(docSnapshot) {
+      const data = docSnapshot.data();
+      return normalizeNestClassSlot({ id: docSnapshot.id, ...data }, docSnapshot.id);
+    }
+
+    async function saveNestClassSlotRecord(slot) {
+      if (!serviceReady) await initializeServices();
+      if (!serviceReady || !recordStore || !isAdminUser()) return null;
+      const normalized = normalizeNestClassSlot(slot);
+      if (!normalized) return null;
+      await setDoc(nestClassSlotDoc(normalized.id), nestClassSlotPayload(normalized));
+      return normalized;
+    }
+
+    async function deleteNestClassSlotRecord(slotId) {
+      if (!serviceReady) await initializeServices();
+      if (!serviceReady || !recordStore || !isAdminUser()) return null;
+      await deleteDoc(nestClassSlotDoc(slotId));
+      return slotId;
+    }
+
+    function subscribeNestClassSlots() {
+      if (!serviceReady || !recordStore || unsubscribeNestClassSlots) return;
+      unsubscribeNestClassSlots = onSnapshot(nestClassSlotsCollection(), snapshot => {
+        const firstRemoteLoad = !remoteNestClassesLoaded;
+        remoteNestClassesLoaded = true;
+        remoteNestClassesEmpty = snapshot.empty;
+        if (snapshot.empty) {
+          if (firstRemoteLoad && isAdminUser()) ensureRemoteNestClassSeed();
+          if (!firstRemoteLoad) {
+            nestClassSlots = [];
+            selectedNestSlotIds = [];
+            editingNestSlotId = "";
+            saveState();
+            requestRenderAll();
+          }
+          return;
+        }
+
+        const nextSlots = normalizeNestClassSlots(snapshot.docs.map(recordSnapshotToNestClassSlot).filter(Boolean));
+        nestClassSlots = nextSlots;
+        selectedNestSlotIds = selectedNestSlotIds.filter(slotId => nestClassSlots.some(slot => slot.id === slotId));
+        if (editingNestSlotId && !nestClassSlots.some(slot => slot.id === editingNestSlotId)) editingNestSlotId = "";
+        saveState();
+        requestRenderAll();
+      }, error => {
+        console.warn("Nest class subscription failed", error);
+      });
+    }
+
+    async function ensureRemoteNestClassSeed() {
+      if (!serviceReady || !recordStore || !isAdminUser() || !remoteNestClassesLoaded || !remoteNestClassesEmpty || nestClassSeedPromise) return;
+      nestClassSeedPromise = Promise.all(nestClassSlots.map(slot => saveNestClassSlotRecord(slot)))
+        .catch(error => {
+          console.warn("Nest class seed failed", error);
+        })
+        .finally(() => {
+          nestClassSeedPromise = null;
+        });
+      return nestClassSeedPromise;
     }
 
     function orderSlotSummary(slotIds) {
@@ -5377,6 +5702,7 @@
     let calendarSettings = normalizeCalendarSettings(storage.get("calendarSettings", null));
     let slotOverrides = storage.get("slotOverrides", {});
     let slots = makeSlots(calendarSettings, storage.get("slots", []));
+    let nestClassSlots = normalizeNestClassSlots(storage.get("nestClassSlots", defaultNestClassSlots));
     let reservations = storage.get("reservations", []);
     let orders = storage.get("orders", [
       {
@@ -5406,6 +5732,7 @@
       storage.set("orders", orders);
       storage.set("calendarSettings", calendarSettings);
       storage.set("slotOverrides", slotOverrides);
+      storage.set("nestClassSlots", nestClassSlots);
       storage.set("reservations", reservations);
     }
 
@@ -6398,11 +6725,178 @@
       });
     }
 
+    function isNestClassAdminEditing() {
+      return document.body.classList.contains("admin-on") && isAdminUser();
+    }
+
+    function renderNestClassAdminForm() {
+      const editingSlot = nestSlotById(editingNestSlotId);
+      const selectedDay = editingSlot?.day || "mon";
+      const selectedTime = editingSlot?.time || "18:00";
+      const title = editingSlot?.title || "";
+      const teacher = editingSlot?.teacher || "";
+      const isEditing = Boolean(editingSlot);
+      return `
+        <div class="nest-class-admin-panel">
+          <div>
+            <strong>${safeText(t("nestClassAdminTitle"))}</strong>
+            <span>${safeText(t("nestClassAdminHelper"))}</span>
+          </div>
+          <form class="nest-class-admin-form" id="nestClassAdminForm">
+            <input type="hidden" id="nestAdminSlotId" value="${escapeAttr(editingSlot?.id || "")}">
+            <label class="sr-only" for="nestAdminDay">${safeText(t("nestClassAdminDay"))}</label>
+            <select class="field" id="nestAdminDay" required>
+              ${nestWeekDays.map(day => `
+                <option value="${escapeAttr(day.id)}" ${day.id === selectedDay ? "selected" : ""}>${safeText(lang === "ko" ? day.koLong : day.enLong)}</option>
+              `).join("")}
+            </select>
+            <label class="sr-only" for="nestAdminStart">${safeText(t("nestClassAdminStart"))}</label>
+            <input class="field" id="nestAdminStart" type="time" step="3600" value="${escapeAttr(selectedTime)}" aria-label="${escapeAttr(t("nestClassAdminStart"))}" required>
+            <label class="sr-only" for="nestAdminTitle">${safeText(t("nestClassAdminName"))}</label>
+            <input class="field" id="nestAdminTitle" type="text" maxlength="80" value="${escapeAttr(title)}" placeholder="${escapeAttr(t("nestClassAdminName"))}" required>
+            <label class="sr-only" for="nestAdminTeacher">${safeText(t("nestClassAdminInstructor"))}</label>
+            <input class="field" id="nestAdminTeacher" type="text" maxlength="80" value="${escapeAttr(teacher)}" placeholder="${escapeAttr(t("nestClassAdminInstructor"))}">
+            <button class="primary-btn" type="submit">${safeText(t(isEditing ? "nestClassAdminUpdate" : "nestClassAdminAdd"))}</button>
+            <button class="ghost-btn" type="button" data-nest-admin-cancel ${isEditing ? "" : "hidden"}>${safeText(t("nestClassAdminCancel"))}</button>
+          </form>
+        </div>
+      `;
+    }
+
+    function renderNestClassSlot(slot, adminEditing) {
+      const isSelected = selectedNestSlotIds.includes(slot.id);
+      const slotContent = `
+        <span class="slot-time">${safeText(`${slot.time}-${slot.end}`)}</span>
+        <span class="nest-slot-name">${safeText(slot.title)}</span>
+        ${slot.teacher ? `<span class="nest-slot-teacher">${safeText(slot.teacher)}</span>` : ""}
+      `;
+      const pressed = isSelected ? "true" : "false";
+      const label = escapeAttr(formatNestSlot(slot));
+      if (!adminEditing) {
+        return `
+          <button
+            class="slot-btn nest-slot-btn ${isSelected ? "is-selected" : ""}"
+            type="button"
+            data-nest-slot-id="${escapeAttr(slot.id)}"
+            aria-pressed="${pressed}"
+            aria-label="${label}"
+          >
+            ${slotContent}
+          </button>
+        `;
+      }
+
+      return `
+        <article class="slot-btn nest-slot-btn nest-slot-card ${isSelected ? "is-selected" : ""}">
+          <button
+            class="nest-slot-main"
+            type="button"
+            data-nest-slot-id="${escapeAttr(slot.id)}"
+            aria-pressed="${pressed}"
+            aria-label="${label}"
+          >
+            ${slotContent}
+          </button>
+          <div class="nest-slot-admin-actions" aria-label="${escapeAttr(t("nestClassAdminTitle"))}">
+            <button class="nest-slot-admin-btn" type="button" data-nest-edit="${escapeAttr(slot.id)}" aria-label="${escapeAttr(`${t("nestClassEdit")} ${formatNestSlot(slot)}`)}">${safeText(t("nestClassEdit"))}</button>
+            <button class="nest-slot-admin-btn is-delete" type="button" data-nest-delete="${escapeAttr(slot.id)}" aria-label="${escapeAttr(`${t("nestClassDelete")} ${formatNestSlot(slot)}`)}">×</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function editNestClassSlot(slotId) {
+      if (!isNestClassAdminEditing() || !nestSlotById(slotId)) return;
+      editingNestSlotId = slotId;
+      renderNestCalendar();
+      requestAnimationFrame(() => {
+        document.getElementById("nestClassAdminForm")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.getElementById("nestAdminTitle")?.focus();
+      });
+    }
+
+    function cancelNestClassEdit() {
+      editingNestSlotId = "";
+      renderNestCalendar();
+    }
+
+    async function saveNestClassFromForm(event) {
+      event.preventDefault();
+      if (!isNestClassAdminEditing()) {
+        showToast(t("authRequired"));
+        return;
+      }
+
+      const slotId = document.getElementById("nestAdminSlotId")?.value || "";
+      const day = document.getElementById("nestAdminDay")?.value || "mon";
+      const time = normalizeClassTime(document.getElementById("nestAdminStart")?.value);
+      const title = document.getElementById("nestAdminTitle")?.value || "";
+      const teacher = document.getElementById("nestAdminTeacher")?.value || "";
+      const normalized = normalizeNestClassSlot({
+        id: slotId || newNestClassSlotId(day, time),
+        day,
+        time,
+        end: addOneHourToClassTime(time),
+        title,
+        teacher
+      });
+
+      if (!normalized) {
+        showToast(t("nestClassFormInvalid"));
+        event.target.reportValidity();
+        return;
+      }
+
+      const wasEditing = Boolean(slotId);
+      nestClassSlots = normalizeNestClassSlots([
+        ...nestClassSlots.filter(slot => slot.id !== normalized.id),
+        normalized
+      ]);
+      editingNestSlotId = "";
+      saveState();
+      renderNestCalendar();
+      renderSelectedNestSlot();
+
+      try {
+        const saved = await saveNestClassSlotRecord(normalized);
+        showToast(t(saved ? (wasEditing ? "nestClassUpdated" : "nestClassAdded") : "nestClassLocalOnly"));
+      } catch (error) {
+        console.warn("Nest class save failed", error);
+        showToast(t("nestClassLocalOnly"));
+      }
+    }
+
+    async function deleteNestClassSlot(slotId) {
+      if (!isNestClassAdminEditing()) {
+        showToast(t("authRequired"));
+        return;
+      }
+      if (!nestSlotById(slotId)) return;
+      if (!window.confirm(t("nestClassDeleteConfirm"))) return;
+
+      nestClassSlots = nestClassSlots.filter(slot => slot.id !== slotId);
+      selectedNestSlotIds = selectedNestSlotIds.filter(id => id !== slotId);
+      if (editingNestSlotId === slotId) editingNestSlotId = "";
+      saveState();
+      renderNestCalendar();
+      renderSelectedNestSlot();
+
+      try {
+        const deleted = await deleteNestClassSlotRecord(slotId);
+        showToast(t(deleted ? "nestClassDeleted" : "nestClassLocalOnly"));
+      } catch (error) {
+        console.warn("Nest class delete failed", error);
+        showToast(t("nestClassLocalOnly"));
+      }
+    }
+
     function renderNestCalendar() {
       const board = document.getElementById("nestClassCalendar");
       if (!board) return;
+      const adminEditing = isNestClassAdminEditing();
       board.innerHTML = `
         <div class="month-calendar nest-class-calendar" aria-label="${escapeAttr(t("studioTabNest"))}">
+          ${adminEditing ? renderNestClassAdminForm() : ""}
           <div class="calendar-week-block">
             <div class="calendar-week-heading">
               <span class="calendar-month-chip">${safeText(t("nestTimetableChipClasses"))}</span>
@@ -6418,22 +6912,7 @@
                       <span>${safeText(nestDaySecondary(day))}</span>
                     </div>
                     <div class="calendar-slot-list">
-                      ${daySlots.map(slot => {
-                        const isSelected = selectedNestSlotIds.includes(slot.id);
-                        return `
-                          <button
-                            class="slot-btn nest-slot-btn ${isSelected ? "is-selected" : ""}"
-                            type="button"
-                            data-nest-slot-id="${escapeAttr(slot.id)}"
-                            aria-pressed="${isSelected ? "true" : "false"}"
-                            aria-label="${escapeAttr(formatNestSlot(slot))}"
-                          >
-                            <span class="slot-time">${safeText(`${slot.time}-${slot.end}`)}</span>
-                            <span class="nest-slot-name">${safeText(slot.title)}</span>
-                            ${slot.teacher ? `<span class="nest-slot-teacher">${safeText(slot.teacher)}</span>` : ""}
-                          </button>
-                        `;
-                      }).join("")}
+                      ${daySlots.map(slot => renderNestClassSlot(slot, adminEditing)).join("")}
                     </div>
                   </section>
                 `;
@@ -6449,6 +6928,15 @@
           renderNestCalendar();
           renderSelectedNestSlot();
         });
+      });
+
+      board.querySelector("#nestClassAdminForm")?.addEventListener("submit", saveNestClassFromForm);
+      board.querySelector("[data-nest-admin-cancel]")?.addEventListener("click", cancelNestClassEdit);
+      board.querySelectorAll("[data-nest-edit]").forEach(button => {
+        button.addEventListener("click", () => editNestClassSlot(button.getAttribute("data-nest-edit")));
+      });
+      board.querySelectorAll("[data-nest-delete]").forEach(button => {
+        button.addEventListener("click", () => deleteNestClassSlot(button.getAttribute("data-nest-delete")));
       });
     }
 
@@ -6871,6 +7359,7 @@
       const canEnable = Boolean(enabled && isAdminUser());
       adminSwitch.checked = canEnable;
       document.body.classList.toggle("admin-on", canEnable);
+      if (!canEnable) editingNestSlotId = "";
       renderAll();
       return canEnable;
     }

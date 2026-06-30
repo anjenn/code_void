@@ -65,6 +65,17 @@ service cloud.firestore {
     //   - language: string (required, enum: ko, en)
     //   - createdAt: timestamp (required, immutable after create)
     //   - updatedAt: timestamp (required)
+    //
+    // Collection: nestClasses
+    // Document ID: class slot ID
+    // Fields:
+    //   - day: string (required, enum: mon, tue, wed, thu, fri, sat, sun)
+    //   - time: string (required, HH:MM)
+    //   - end: string (required, HH:MM)
+    //   - title: string (required, 1-80 chars)
+    //   - teacher: string (required, 0-80 chars)
+    //   - sortKey: string (required, 1-120 chars)
+    //   - updatedAt: timestamp (required)
     // ===============================================================
 
     function isSignedIn() {
@@ -153,7 +164,7 @@ service cloud.firestore {
         hasRequiredInquiryFields(data) &&
         validString(data.name, 1, 80) &&
         validString(data.contact, 0, 120) &&
-        data.concept in ["", "profileA", "profileB", "headgear", "package"] &&
+        data.concept in ["", "profileA", "profileB", "headgear", "package", "nestDanceClass"] &&
         validString(data.slotText, 0, 1200) &&
         validString(data.slotIdsText, 0, 1200) &&
         validString(data.memo, 0, 1000) &&
@@ -278,7 +289,7 @@ service cloud.firestore {
         validString(data.requestId, 0, 128) &&
         validString(data.name, 1, 80) &&
         validString(data.contact, 0, 120) &&
-        data.concept in ["", "profileA", "profileB", "headgear", "package"] &&
+        data.concept in ["", "profileA", "profileB", "headgear", "package", "nestDanceClass"] &&
         validString(data.slotId, 0, 80) &&
         validString(data.slotText, 0, 200) &&
         data.status in ["confirmed", "completed", "cancelled"] &&
@@ -305,6 +316,39 @@ service cloud.firestore {
         data.createdByUid == resource.data.createdByUid &&
         data.createdAt == resource.data.createdAt &&
         data.updatedAt == request.time;
+    }
+
+    function validNestClassTime(value) {
+      return value is string &&
+        value.matches("^([01][0-9]|2[0-3]):[0-5][0-9]$");
+    }
+
+    function validNestClassSlot(data) {
+      return data.keys().hasOnly([
+        "day",
+        "time",
+        "end",
+        "title",
+        "teacher",
+        "sortKey",
+        "updatedAt"
+      ]) &&
+        data.keys().hasAll([
+          "day",
+          "time",
+          "end",
+          "title",
+          "teacher",
+          "sortKey",
+          "updatedAt"
+        ]) &&
+        data.day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] &&
+        validNestClassTime(data.time) &&
+        validNestClassTime(data.end) &&
+        validString(data.title, 1, 80) &&
+        validString(data.teacher, 0, 80) &&
+        validString(data.sortKey, 1, 120) &&
+        data.updatedAt is timestamp;
     }
 
     match /inquiries/{inquiryId} {
@@ -341,6 +385,14 @@ service cloud.firestore {
       allow create: if validReservationCreate(request.resource.data);
       allow read: if isAdmin();
       allow update: if validReservationUpdate(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /nestClasses/{classId} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        validNestClassSlot(request.resource.data) &&
+        request.resource.data.updatedAt == request.time;
       allow delete: if isAdmin();
     }
 
