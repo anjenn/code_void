@@ -217,6 +217,12 @@ const i18n = {
     reservationManual: "수동 기록",
     reservationLinkedTo: "요청 #{id}",
     popularConcepts: "인기 컨셉",
+    trafficTitle: "클릭 트래픽",
+    trafficUniqueNote: "브라우저 기준 고유 사용자로 집계됩니다. 같은 사용자가 같은 버튼을 여러 번 눌러도 1회로 계산됩니다.",
+    trafficConcepts: "컨셉 버튼",
+    trafficLinks: "링크 클릭",
+    trafficBooking: "예약 문의",
+    trafficEmpty: "아직 클릭 기록이 없습니다.",
     visits: "방문 수",
     inquiries: "문의 수",
     openOrders: "진행 중 주문",
@@ -458,6 +464,12 @@ const i18n = {
     reservationManual: "Manual record",
     reservationLinkedTo: "Request #{id}",
     popularConcepts: "Popular concepts",
+    trafficTitle: "Click traffic",
+    trafficUniqueNote: "Counts unique users by browser. Pressing the same button multiple times by the same user counts once.",
+    trafficConcepts: "Concept buttons",
+    trafficLinks: "Link clicks",
+    trafficBooking: "Reservation inquiry",
+    trafficEmpty: "No click traffic yet.",
     visits: "Visits",
     inquiries: "Inquiries",
     openOrders: "Open orders",
@@ -547,6 +559,22 @@ const conceptMeta = [
   { id: "package", symbol: "✺" }
 ];
 
+const trafficEventMeta = [
+  { key: "concept_profileA_guide", category: "concept", labelKo: "기본 촬영 안내 보기", labelEn: "Basic Shoot guide" },
+  { key: "concept_profileA_select", category: "concept", labelKo: "기본 촬영 선택", labelEn: "Basic Shoot select" },
+  { key: "concept_headgear_guide", category: "concept", labelKo: "컨셉 촬영 컨셉 보기", labelEn: "Concept Shoot view" },
+  { key: "concept_headgear_select", category: "concept", labelKo: "컨셉 촬영 선택", labelEn: "Concept Shoot select" },
+  { key: "concept_package_guide", category: "concept", labelKo: "개인 유료 커미션 컨셉 보기", labelEn: "Paid Commission view" },
+  { key: "concept_package_select", category: "concept", labelKo: "개인 유료 커미션 선택", labelEn: "Paid Commission select" },
+  { key: "link_nest_instagram", category: "link", labelKo: "네스트 댄스 Instagram", labelEn: "Nest Dance Instagram" },
+  { key: "link_nest_blog", category: "link", labelKo: "네스트 댄스 Blog", labelEn: "Nest Dance Blog" },
+  { key: "link_code_instagram", category: "link", labelKo: "코드보이드 Instagram", labelEn: "Code V01D Instagram" },
+  { key: "link_code_blog", category: "link", labelKo: "코드보이드 Blog", labelEn: "Code V01D Blog" },
+  { key: "link_code_kakao", category: "link", labelKo: "코드보이드 Kakao Channel", labelEn: "Code V01D Kakao Channel" },
+  { key: "booking_inquiry", category: "booking", labelKo: "예약 문의", labelEn: "Reservation inquiry" }
+];
+const trafficEventKeys = new Set(trafficEventMeta.map(event => event.key));
+
 const nestWeekDays = [
   { id: "mon", ko: "월", en: "MON", koLong: "월요일", enLong: "Monday" },
   { id: "tue", ko: "화", en: "TUE", koLong: "화요일", enLong: "Tuesday" },
@@ -599,9 +627,11 @@ let unsubscribeCalendarSettings = null;
 let unsubscribeSlotOverrides = [];
 let unsubscribeReservationRecords = null;
 let unsubscribeNestClassSlots = null;
+let unsubscribeTrafficEvents = null;
 let remoteNestClassesLoaded = false;
 let remoteNestClassesEmpty = false;
 let nestClassSeedPromise = null;
+let trafficEvents = storage.get("trafficEvents", []);
 let renderAllQueued = false;
 
 async function loadRemoteSdk() {
@@ -658,10 +688,12 @@ async function initializeServices() {
           });
           subscribeOrderRecords();
           subscribeReservations();
+          subscribeTrafficEvents();
           ensureRemoteNestClassSeed();
         } else {
           unsubscribeFromOrderRecords();
           unsubscribeFromReservations();
+          unsubscribeFromTrafficEvents();
           if (document.body.classList.contains("admin-on")) setAdminMode(false);
         }
       });
@@ -756,6 +788,134 @@ function nestClassSlotsCollection() {
 
 function nestClassSlotDoc(slotId) {
   return doc(recordStore, "nestClasses", slotId);
+}
+
+function trafficEventsCollection() {
+  return collection(recordStore, "trafficEvents");
+}
+
+function trafficEventDoc(eventKey, visitorId = getTrafficVisitorId()) {
+  return doc(recordStore, "trafficEvents", `${visitorId}_${eventKey}`);
+}
+
+function trafficMeta(eventKey) {
+  return trafficEventMeta.find(event => event.key === eventKey) || null;
+}
+
+function trafficLabel(eventKey) {
+  const meta = trafficMeta(eventKey);
+  if (!meta) return eventKey;
+  return lang === "ko" ? meta.labelKo : meta.labelEn;
+}
+
+function getTrafficVisitorId() {
+  let visitorId = storage.get("trafficVisitorId", "");
+  if (!visitorId) {
+    visitorId = crypto.randomUUID ? crypto.randomUUID() : `visitor-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    visitorId = visitorId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
+    storage.set("trafficVisitorId", visitorId);
+  }
+  return visitorId;
+}
+
+function localTrackedTraffic() {
+  const tracked = storage.get("trafficTracked", {});
+  return tracked && typeof tracked === "object" && !Array.isArray(tracked) ? tracked : {};
+}
+
+function markTrafficTracked(eventKey) {
+  const tracked = localTrackedTraffic();
+  if (tracked[eventKey]) return false;
+  tracked[eventKey] = new Date().toISOString();
+  storage.set("trafficTracked", tracked);
+  return true;
+}
+
+function localTrafficEventsFromTracked() {
+  const visitorId = getTrafficVisitorId();
+  return Object.entries(localTrackedTraffic())
+    .filter(([eventKey]) => trafficEventKeys.has(eventKey))
+    .map(([eventKey, createdAt]) => ({
+      id: `${visitorId}_${eventKey}`,
+      visitorId,
+      eventKey,
+      category: trafficMeta(eventKey)?.category || "link",
+      createdAt
+    }));
+}
+
+function trafficEventPayload(eventKey, visitorId = getTrafficVisitorId()) {
+  const meta = trafficMeta(eventKey);
+  return {
+    eventKey,
+    category: meta?.category || "link",
+    visitorId,
+    language: lang,
+    createdAt: serverTimestamp()
+  };
+}
+
+async function trackTrafficEvent(eventKey) {
+  if (!trafficEventKeys.has(eventKey)) return;
+  const isFirstLocalClick = markTrafficTracked(eventKey);
+  if (isFirstLocalClick) {
+    trafficEvents = mergeTrafficEvents(trafficEvents, localTrafficEventsFromTracked());
+    storage.set("trafficEvents", trafficEvents);
+    requestRenderAll();
+  }
+  if (!isFirstLocalClick) return;
+
+  try {
+    if (!serviceReady) await initializeServices();
+    if (!serviceReady || !recordStore) return;
+    const visitorId = getTrafficVisitorId();
+    await setDoc(trafficEventDoc(eventKey, visitorId), trafficEventPayload(eventKey, visitorId));
+  } catch (error) {
+    console.warn("Traffic tracking skipped", error);
+  }
+}
+
+function recordSnapshotToTrafficEvent(docSnapshot) {
+  const data = docSnapshot.data();
+  return {
+    id: docSnapshot.id,
+    eventKey: data.eventKey || "",
+    category: data.category || "",
+    visitorId: data.visitorId || "",
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
+  };
+}
+
+function mergeTrafficEvents(primary = [], fallback = []) {
+  const eventsById = new Map();
+  const primaryEvents = Array.isArray(primary) ? primary : [];
+  const fallbackEvents = Array.isArray(fallback) ? fallback : [];
+  [...fallbackEvents, ...primaryEvents].forEach(event => {
+    if (event?.id && trafficEventKeys.has(event.eventKey)) eventsById.set(event.id, event);
+  });
+  return [...eventsById.values()];
+}
+
+function unsubscribeFromTrafficEvents() {
+  if (unsubscribeTrafficEvents) {
+    unsubscribeTrafficEvents();
+    unsubscribeTrafficEvents = null;
+  }
+}
+
+function subscribeTrafficEvents() {
+  if (!serviceReady || !recordStore || !isAdminUser() || unsubscribeTrafficEvents) return;
+  const q = query(trafficEventsCollection(), orderBy("createdAt", "desc"));
+  unsubscribeTrafficEvents = onSnapshot(q, snapshot => {
+    trafficEvents = mergeTrafficEvents(snapshot.docs.map(recordSnapshotToTrafficEvent), localTrafficEventsFromTracked());
+    storage.set("trafficEvents", trafficEvents);
+    renderAll();
+  }, error => {
+    console.warn("Traffic subscription failed", error);
+    trafficEvents = mergeTrafficEvents(trafficEvents, localTrafficEventsFromTracked());
+    storage.set("trafficEvents", trafficEvents);
+    requestRenderAll();
+  });
 }
 
 function isValidNestDay(dayId) {
@@ -1772,7 +1932,7 @@ function renderConceptCards() {
       <article class="concept-card" data-concept="${escapeAttr(id)}" data-symbol="${escapeAttr(symbol)}">
         <h3>${safeText(concept.title)}</h3>
         <div class="concept-actions">
-          <a class="primary-btn" href="${escapeAttr(guideUrl)}" target="_blank" rel="noopener noreferrer">${safeText(guideLabel)}</a>
+          <a class="primary-btn" href="${escapeAttr(guideUrl)}" target="_blank" rel="noopener noreferrer" data-traffic-key="${escapeAttr(`concept_${id}_guide`)}">${safeText(guideLabel)}</a>
           <button class="ghost-btn concept-pick-btn" type="button" data-concept-pick="${escapeAttr(id)}">${safeText(t("selectThisConcept"))}</button>
           <span class="price-chip">${safeText(concept.price)}</span>
         </div>
@@ -1783,10 +1943,14 @@ function renderConceptCards() {
   grid.querySelectorAll("[data-concept-pick]").forEach(button => {
     button.addEventListener("click", () => {
       const conceptId = button.getAttribute("data-concept-pick");
+      trackTrafficEvent(`concept_${conceptId}_select`);
       const select = document.getElementById("conceptSelect");
       if (select) select.value = conceptId;
       document.getElementById("calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  });
+  grid.querySelectorAll("[data-traffic-key]").forEach(link => {
+    link.addEventListener("click", () => trackTrafficEvent(link.getAttribute("data-traffic-key")));
   });
 }
 
@@ -2889,6 +3053,54 @@ function renderVisitHistogramCard(visits) {
   `;
 }
 
+function trafficCountsByEvent() {
+  const events = mergeTrafficEvents(trafficEvents, localTrafficEventsFromTracked());
+  const visitorsByEvent = new Map(trafficEventMeta.map(event => [event.key, new Set()]));
+  events.forEach(event => {
+    if (!trafficEventKeys.has(event.eventKey) || !event.visitorId) return;
+    visitorsByEvent.get(event.eventKey)?.add(event.visitorId);
+  });
+  return Object.fromEntries([...visitorsByEvent.entries()].map(([eventKey, visitors]) => [eventKey, visitors.size]));
+}
+
+function renderTrafficGroup(titleKey, category, counts, maxCount) {
+  const items = trafficEventMeta.filter(event => event.category === category);
+  return `
+    <section class="traffic-card">
+      <h4>${safeText(t(titleKey))}</h4>
+      <div class="bar-list traffic-list">
+        ${items.map(event => {
+          const count = counts[event.key] || 0;
+          return `
+            <div class="bar-row traffic-row">
+              <span>${safeText(trafficLabel(event.key))}</span>
+              <div class="bar-track"><div class="bar-fill" style="width: ${Math.max(count ? 8 : 3, count / maxCount * 100)}%;"></div></div>
+              <strong>${safeText(count)}</strong>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderTrafficSummary() {
+  const grid = document.getElementById("trafficGrid");
+  if (!grid) return;
+  const counts = trafficCountsByEvent();
+  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+  if (!total) {
+    grid.innerHTML = `<div class="empty-state">${safeText(t("trafficEmpty"))}</div>`;
+    return;
+  }
+  const maxCount = Math.max(1, ...Object.values(counts));
+  grid.innerHTML = [
+    renderTrafficGroup("trafficConcepts", "concept", counts, maxCount),
+    renderTrafficGroup("trafficLinks", "link", counts, maxCount),
+    renderTrafficGroup("trafficBooking", "booking", counts, maxCount)
+  ].join("");
+}
+
 function renderMetrics() {
   const visits = storage.get("visits", 1);
   const inquiries = orders.length;
@@ -2919,6 +3131,7 @@ function renderMetrics() {
       <strong>${safeText(item.count)}</strong>
     </div>
   `).join("");
+  renderTrafficSummary();
 }
 
 function renderAll() {
@@ -3081,6 +3294,10 @@ function prefillReservationFromOrder(orderId) {
 function bindEvents() {
   document.querySelectorAll("[data-lang-option]").forEach(button => {
     button.addEventListener("click", () => setLanguage(button.dataset.langOption));
+  });
+
+  document.querySelectorAll("[data-traffic-key]").forEach(link => {
+    link.addEventListener("click", () => trackTrafficEvent(link.getAttribute("data-traffic-key")));
   });
 
   document.querySelectorAll("[data-studio-tab]").forEach(button => {

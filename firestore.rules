@@ -76,6 +76,15 @@ service cloud.firestore {
     //   - teacher: string (required, 0-80 chars)
     //   - sortKey: string (required, 1-120 chars)
     //   - updatedAt: timestamp (required)
+    //
+    // Collection: trafficEvents
+    // Document ID: visitorId_eventKey
+    // Fields:
+    //   - eventKey: string (required, enum of tracked click targets)
+    //   - category: string (required, enum: concept, link, booking)
+    //   - visitorId: string (required, 1-80 chars)
+    //   - language: string (required, enum: ko, en)
+    //   - createdAt: timestamp (required)
     // ===============================================================
 
     function isSignedIn() {
@@ -351,6 +360,53 @@ service cloud.firestore {
         data.updatedAt is timestamp;
     }
 
+    function validTrafficEventKey(value) {
+      return value in [
+        "concept_profileA_guide",
+        "concept_profileA_select",
+        "concept_headgear_guide",
+        "concept_headgear_select",
+        "concept_package_guide",
+        "concept_package_select",
+        "link_nest_instagram",
+        "link_nest_blog",
+        "link_code_instagram",
+        "link_code_blog",
+        "link_code_kakao",
+        "booking_inquiry"
+      ];
+    }
+
+    function trafficCategoryForEvent(value) {
+      return value.matches("^concept_.*") ? "concept" :
+        value == "booking_inquiry" ? "booking" :
+        "link";
+    }
+
+    function validTrafficEvent(eventId, data) {
+      return data.keys().hasOnly([
+        "eventKey",
+        "category",
+        "visitorId",
+        "language",
+        "createdAt"
+      ]) &&
+        data.keys().hasAll([
+          "eventKey",
+          "category",
+          "visitorId",
+          "language",
+          "createdAt"
+        ]) &&
+        validTrafficEventKey(data.eventKey) &&
+        data.category == trafficCategoryForEvent(data.eventKey) &&
+        validString(data.visitorId, 1, 80) &&
+        data.visitorId.matches("^[A-Za-z0-9_-]{1,80}$") &&
+        eventId == data.visitorId + "_" + data.eventKey &&
+        data.language in ["ko", "en"] &&
+        data.createdAt == request.time;
+    }
+
     match /inquiries/{inquiryId} {
       allow create: if validInquiryCreate(request.resource.data);
       allow read: if isAdmin();
@@ -393,6 +449,13 @@ service cloud.firestore {
       allow create, update: if isAdmin() &&
         validNestClassSlot(request.resource.data) &&
         request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    match /trafficEvents/{eventId} {
+      allow create: if validTrafficEvent(eventId, request.resource.data);
+      allow read: if isAdmin();
+      allow update: if false;
       allow delete: if isAdmin();
     }
 

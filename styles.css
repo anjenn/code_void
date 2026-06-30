@@ -1648,6 +1648,45 @@ body.admin-on .admin-hub { display: block; }
   background: linear-gradient(90deg, #f19ac8, #aa8df5, #9ee9f5);
 }
 
+.traffic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.traffic-card {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(225, 148, 207, .24);
+  background: rgba(255,255,255,.48);
+}
+
+.traffic-card h4 {
+  margin: 0;
+  color: #8f4e9b;
+  font-family: var(--display);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.traffic-list {
+  gap: 10px;
+}
+
+.traffic-row {
+  grid-template-columns: minmax(112px, 1.1fr) minmax(72px, 1fr) 28px;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.traffic-row span {
+  min-width: 0;
+}
+
 .orders-form {
   display: grid;
   gap: 10px;
@@ -1938,6 +1977,8 @@ body.admin-on .admin-hub { display: block; }
   .footer-note { border-radius: 24px; flex-direction: column; }
   .footer-credit { width: 100%; }
   .bar-row { grid-template-columns: 1fr; }
+  .traffic-grid { grid-template-columns: 1fr; }
+  .traffic-row { grid-template-columns: 1fr minmax(96px, 1fr) 30px; }
   .slot-table, .order-table { font-size: 13px; }
   .slot-table th:nth-child(3), .slot-table td:nth-child(3), .order-table th:nth-child(5), .order-table td:nth-child(5) { display: none; }
 }
@@ -3678,6 +3719,16 @@ body.admin-on .nest-slot-card:focus-within .nest-slot-admin-actions {
 
 .bar-fill {
   background: linear-gradient(90deg, #18763d, #19d377, var(--gold));
+}
+
+.traffic-card {
+  border: 2px solid rgba(20,95,45,.30);
+  background: rgba(255,254,243,.72);
+}
+
+.traffic-card h4 {
+  color: #145f2d;
+  font-family: var(--display);
 }
 
 .admin-lock {
