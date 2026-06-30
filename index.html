@@ -478,7 +478,7 @@
       background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(255,232,132,.86));
     }
 
-    .link-cloud a[href="#calendar"] {
+    .link-cloud a[href="#bookingTabs"] {
       width: 100%;
       justify-self: stretch;
       margin-top: 2px;
@@ -756,6 +756,7 @@
       flex-wrap: wrap;
       gap: 10px;
       margin: 0 0 16px;
+      scroll-margin-top: 104px;
     }
 
     .studio-tab {
@@ -2474,7 +2475,7 @@
       color: #fffef2;
     }
 
-    .link-cloud a[href="#calendar"] {
+    .link-cloud a[href="#bookingTabs"] {
       position: relative;
       color: #07140b;
       justify-self: start;
@@ -2496,7 +2497,7 @@
       transform: rotate(-1.2deg);
     }
 
-    .link-cloud a[href="#calendar"]::before {
+    .link-cloud a[href="#bookingTabs"]::before {
       content: "↘";
       position: absolute;
       right: calc(100% + 18px);
@@ -2509,7 +2510,7 @@
       transform: rotate(-12deg);
     }
 
-    .link-cloud a[href="#calendar"]::after {
+    .link-cloud a[href="#bookingTabs"]::after {
       content: "›";
       margin-left: 44px;
       font-size: 34px;
@@ -2518,7 +2519,7 @@
       transform: translateY(-1px);
     }
 
-    .link-cloud a[href="#calendar"]:hover {
+    .link-cloud a[href="#bookingTabs"]:hover {
       color: #07140b;
       transform: translateY(-3px) rotate(1deg);
       filter: saturate(1.1) brightness(1.04);
@@ -3692,15 +3693,15 @@
         width: 100%;
         min-width: 0;
       }
-      .link-cloud a[href="#calendar"] {
+      .link-cloud a[href="#bookingTabs"] {
         justify-self: stretch;
         min-width: 0;
         min-height: 58px;
         margin-left: 0;
         font-size: 20px;
       }
-      .link-cloud a[href="#calendar"]::before { display: none; }
-      .link-cloud a[href="#calendar"]::after { margin-left: 18px; }
+      .link-cloud a[href="#bookingTabs"]::before { display: none; }
+      .link-cloud a[href="#bookingTabs"]::after { margin-left: 18px; }
       .hero-moodboard {
         min-height: 0;
         grid-template-columns: 1fr;
@@ -3971,7 +3972,7 @@
                   <a href="http://pf.kakao.com/_dxfKKX/chat" target="_blank" rel="noopener noreferrer" aria-label="Kakao Channel">Kakao Channel</a>
                 </div>
               </div>
-              <a href="#calendar" data-i18n="bookLink">예약 문의</a>
+              <a href="#bookingTabs" data-i18n="bookLink">예약 문의</a>
             </nav>
           </div>
           <aside class="hero-moodboard" aria-label="Code V01D visual direction">
@@ -3992,9 +3993,9 @@
           </div>
         </div>
 
-        <div class="studio-tabs" role="tablist" aria-label="Studio calendars">
-          <button class="studio-tab is-active" id="studioTabCode" type="button" role="tab" aria-selected="true" aria-controls="studioPanelCode" data-studio-tab="code" data-i18n="studioTabCode">Code V01D</button>
-          <button class="studio-tab" id="studioTabNest" type="button" role="tab" aria-selected="false" aria-controls="studioPanelNest" data-studio-tab="nest" data-i18n="studioTabNest">Nest Studio</button>
+        <div class="studio-tabs" id="bookingTabs" role="tablist" aria-label="예약 스튜디오 선택">
+          <button class="studio-tab is-active" id="studioTabCode" type="button" role="tab" aria-selected="true" aria-controls="studioPanelCode" data-studio-tab="code" data-i18n="studioTabCode">코드보이드</button>
+          <button class="studio-tab" id="studioTabNest" type="button" role="tab" aria-selected="false" aria-controls="studioPanelNest" data-studio-tab="nest" data-i18n="studioTabNest">네스트 댄스</button>
         </div>
 
         <div class="studio-panel is-active" id="studioPanelCode" role="tabpanel" aria-labelledby="studioTabCode" data-studio-panel="code">
@@ -4361,8 +4362,8 @@
         selectThisConcept: "이 컨셉 선택",
         selectConcept: "컨셉 선택",
         calendarTitle: "예약 캘린더",
-        studioTabCode: "Code V01D",
-        studioTabNest: "Nest Studio",
+        studioTabCode: "코드보이드",
+        studioTabNest: "네스트 댄스",
         nestStudioTitle: "Nest Studio",
         nestStudioIntro: "Nest Studio 일정은 문의하기로 선호 시간대와 위치를 남겨주세요.",
         nestStudioHelper: "요청자가 많을 때 상담과 일정 조율에 도움이 됩니다.",
@@ -4585,8 +4586,8 @@
         selectThisConcept: "Select this concept",
         selectConcept: "Select concept",
         calendarTitle: "Reservation Calendar",
-        studioTabCode: "Code V01D",
-        studioTabNest: "Nest Studio",
+        studioTabCode: "코드보이드",
+        studioTabNest: "네스트 댄스",
         nestStudioTitle: "Nest Studio",
         nestStudioIntro: "For Nest Studio schedules, leave your preferred time and location through inquiry.",
         nestStudioHelper: "This helps consultation and scheduling when there are many requests.",
