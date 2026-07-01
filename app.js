@@ -299,7 +299,7 @@ const i18n = {
     },
     concepts: {
       profileA: { title: "기본 촬영", desc: "", price: "₩60,000" },
-      headgear: { title: "컨셉 촬영", desc: "", price: "₩100,000" },
+      headgear: { title: "컨셉 촬영", desc: "", price: "₩80,000" },
       package: { title: "개인 유료 커미션", desc: "", price: "₩120,000" },
       nestDanceClass: { title: "Nest Studio 댄스 클래스", desc: "", price: "" }
     }
@@ -546,7 +546,7 @@ const i18n = {
     },
     concepts: {
       profileA: { title: "Basic Shoot", desc: "", price: "₩60,000" },
-      headgear: { title: "Concept Shoot", desc: "", price: "₩100,000" },
+      headgear: { title: "Concept Shoot", desc: "", price: "₩80,000" },
       package: { title: "Paid Personal Commission", desc: "", price: "₩120,000" },
       nestDanceClass: { title: "Nest Studio Dance Class", desc: "", price: "" }
     }
